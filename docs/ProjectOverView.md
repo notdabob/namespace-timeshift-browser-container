@@ -7,7 +7,7 @@
    - Creates an isolated namespace with unshare
    - Sets system time to 2020-01-01 12:00:00
    - Configures libfaketime for Java processes
-   - Launches Firefox with a temporary profile
+   - Launches Chrome with a temporary profile
    - Handles JNLP files with faketime
    - Preserves time-shift for child Java processes
    - Provides user instructions in-terminal
@@ -19,7 +19,7 @@
    - Installs coreutils via Homebrew (provides `unshare` and `gdate`)
    - Installs libfaketime via Homebrew
    - Downloads Java faketime agent to /usr/local/lib/
-   - Configures Firefox to handle JNLP files
+   - Configures Chrome to handle JNLP files
 
 3. Java wrapper "scripts/java-time-wrapper.sh" that:
 

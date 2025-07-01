@@ -20,7 +20,7 @@ The solution uses namespace isolation on macOS to create time-shifted environmen
 2. **Time Manipulation**: Sets system time to 2020-01-01 within the namespace using `gdate`
 3. **Library Injection**: Uses `libfaketime.dylib` via `DYLD_INSERT_LIBRARIES` for process time spoofing
 4. **Java Integration**: Configures Java processes with faketime agent for JNLP file handling
-5. **Browser Launch**: Starts Firefox with temporary profile in the time-shifted environment
+5. **Browser Launch**: Starts Chrome with temporary profile in the time-shifted environment
 
 ## Dependencies
 
@@ -28,7 +28,7 @@ The project requires several macOS tools installed via Homebrew:
 
 - `coreutils` (provides `unshare` and `gdate`)
 - `libfaketime` (for time manipulation)
-- Firefox (for browser access)
+- Chrome (for browser access)
 - Java runtime (for JNLP execution)
 
 ## Key Environment Variables
@@ -42,7 +42,7 @@ The project requires several macOS tools installed via Homebrew:
 The main script creates a time-shifted environment where:
 
 1. System time is set to 2020-01-01 12:00:00
-2. Firefox launches with temporary profile
+2. Chrome launches with temporary profile
 3. All child processes inherit the time shift
 4. JNLP files can be handled with preserved time context
 5. Environment cleans up automatically on exit
