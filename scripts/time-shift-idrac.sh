@@ -1,7 +1,4 @@
-#!/bin/zsh
-# -*- mode: zsh; -*-
-# vim: set ft=zsh:
-
+#!/bin/bash
 # time-shift-idrac.sh
 
 # This script creates a time-shifted environment for accessing iDRAC6 with expired SSL certificates.
@@ -9,11 +6,11 @@
 # --- Configuration ---
 
 TARGET_DATE="2020-01-01 12:00:00"
-FAKETIME_LIB="/usr/local/lib/faketime/libfaketime.dylib"
 JAVA_FAKETIME_AGENT="/usr/local/lib/java-faketime-agent.jar"
 FIREFOX_PATH="/Applications/Firefox.app/Contents/MacOS/firefox"
 TEMP_PROFILE_DIR=$(mktemp -d -t firefox_profile_XXXX)
-JNLP_INTERCEPTOR_SCRIPT="$(dirname "$0")/jnlp-time-interceptor.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JNLP_INTERCEPTOR_SCRIPT="$SCRIPT_DIR/jnlp-time-interceptor.sh"
 
 # Ensure JNLP_INTERCEPTOR_SCRIPT is an absolute path for Firefox to find it
 
@@ -51,30 +48,34 @@ echo " within this same unshare session (e.g., using 'screen')"
 # Check for unshare (from coreutils)
 
 if ! command -v unshare &> /dev/null; then
-echo "Error: 'unshare' command not found. Please install coreutils: brew install coreutils"
+echo "Error: 'unshare' command not found. Please run './scripts/install-dependencies.sh' first."
 exit 1
 fi
 
 # Check for gdate (from coreutils)
 
 if ! command -v gdate &> /dev/null; then
-echo "Error: 'gdate' command not found. Please install coreutils: brew install coreutils"
+echo "Error: 'gdate' command not found. Please run './scripts/install-dependencies.sh' first."
 exit 1
 fi
 
 # Check if libfaketime.dylib exists
-
-if [ ! -f "$FAKETIME_LIB" ]; then
-echo "Error: libfaketime.dylib not found at $FAKETIME_LIB."
-echo "Please run 'install-dependencies.sh' first."
-exit 1
+FAKETIME_LIB=""
+if [ -f "$(brew --prefix)/lib/faketime/libfaketime.dylib" ]; then
+    FAKETIME_LIB="$(brew --prefix)/lib/faketime/libfaketime.dylib"
+elif [ -f "$(brew --prefix)/lib/libfaketime.dylib" ]; then
+    FAKETIME_LIB="$(brew --prefix)/lib/libfaketime.dylib"
+else
+    echo "Error: libfaketime.dylib not found."
+    echo "Please run './scripts/install-dependencies.sh' first."
+    exit 1
 fi
 
 # Check if java-faketime-agent.jar exists
 
 if [ ! -f "$JAVA_FAKETIME_AGENT" ]; then
 echo "Error: java-faketime-agent.jar not found at $JAVA_FAKETIME_AGENT."
-echo "Please run 'install-dependencies.sh' first."
+echo "Please run './scripts/install-dependencies.sh' first."
 exit 1
 fi
 

@@ -6,16 +6,16 @@ graph TD
     A --> C[docs/]
     A --> D[README.md]
     A --> E[viewer.jnlp]
-    
+
     B --> F[time-shift-idrac.sh]
     B --> G[install-dependencies.sh]
     B --> H[java-time-wrapper.sh]
     B --> I[jnlp-time-interceptor.sh]
     B --> J[MacOS-faketime-browser.zsh]
-    
+
     C --> K[ProjectOverView.md]
     C --> L[file-structure.md]
-    
+
     style A fill:#e1f5fe
     style B fill:#f3e5f5
     style C fill:#e8f5e8
@@ -29,6 +29,7 @@ graph TD
 ## File Descriptions
 
 ### Scripts Directory (`scripts/`)
+
 - **time-shift-idrac.sh**: Main script that creates isolated namespace with time manipulation
 - **install-dependencies.sh**: Dependency installation script for required tools
 - **java-time-wrapper.sh**: Java wrapper that calculates time offset and launches Java with faketime
@@ -36,6 +37,7 @@ graph TD
 - **MacOS-faketime-browser.zsh**: Simple browser time-shifting example script
 
 ### Root Directory
+
 - **README.md**: Installation instructions, usage workflow, and troubleshooting
 - **viewer.jnlp**: iDRAC6 Virtual Console client configuration file
 
