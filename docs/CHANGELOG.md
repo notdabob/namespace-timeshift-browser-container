@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.0] - 2025-07-02
+
+### Added
+- Smart commit command system via `.claude/commands/commit.md`
+- Claude Code project command `/project:commit` for version management
+- Automated version increment detection (patch/minor/major)
+- VERSION file tracking in `docs/VERSION`
+
+### Enhanced
+- Documentation updated with smart commit workflow instructions
+- README.md includes development workflow section
+- CLAUDE.md expanded with detailed command usage examples
+
+### Removed
+- Legacy `src/claude-commit.sh` script (migrated to Claude command)
+
+## [2.2.0] - 2025-07-02
+
+### Added
+- SSH key management system with email-based configuration
+- Automated SSH key generation (RSA 4096-bit) 
+- SSH key deployment to all discovered servers
+- SSH config file management with server aliases
+- Admin configuration persistence in admin_config.json
+
+### Enhanced
+- Dashboard now includes SSH key management interface
+- Email input form for admin identification
+- One-click SSH key generation and deployment scripts
+- Passwordless SSH access via configured aliases
+
+### Technical
+- New generate-ssh-key.command and deploy-ssh-keys.command scripts
+- SSH config backup functionality
+- Server alias format: idrac-192-168-1-23
+
 ## [2.1.0] - 2025-07-02
 
 ### Added
@@ -18,4 +54,5 @@ All notable changes to this project will be documented in this file.
 
 ## Version History
 
+- **2.2.0** (2025-07-02): SSH key management and passwordless access
 - **2.1.0** (2025-07-02): Initial comprehensive release

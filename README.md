@@ -32,6 +32,7 @@ The script automatically:
 - ✅ Scans your network for iDRAC servers and tracks their status
 - ✅ Creates a beautiful dashboard with server management features
 - ✅ **NEW:** Generates easy-click .command files for instant Virtual Console access
+- ✅ **NEW:** SSH key management for passwordless server access
 - ✅ Opens time-shifted Chrome with valid SSL certificates
 - ✅ Shows you clickable links to all your iDRAC servers
 - ✅ Handles JNLP files automatically for Virtual Console access
@@ -82,6 +83,28 @@ The very first time you use Virtual Console:
 
 After that, all JNLP files will work automatically!
 
+### 🔐 SSH Key Management (NEW!)
+
+The dashboard now includes SSH key management for passwordless access:
+
+**Setup Steps:**
+1. Enter your admin email address in the SSH management section
+2. Click "🔑 Generate SSH Key" - downloads `generate-ssh-key.command`
+3. Double-click the downloaded file to create SSH keys in `~/.ssh/idrac_rsa`
+4. Click "🚀 Deploy to All Servers" - downloads `deploy-ssh-keys.command`
+5. Double-click to deploy keys and update your SSH config
+
+**After Setup:**
+- SSH directly: `ssh idrac-192-168-1-23` (using configured aliases)
+- Or manually: `ssh -i ~/.ssh/idrac_rsa root@192.168.1.23`
+- No more password prompts!
+
+**What it does:**
+- Creates RSA 4096-bit key pair with your email
+- Updates `~/.ssh/config` with server aliases
+- Copies public key to all online iDRAC servers
+- Backs up existing SSH configuration
+
 ### That's Really It
 
 No advanced options needed - the script does everything for you automatically. Just run `./src/launch-idrac.sh` whenever you need to access your iDRAC servers.
@@ -100,9 +123,12 @@ namespace-timeshift-browser-container/
 │   └── www/                                # Web-ready files for hosting
 │       ├── index.html                      # Dashboard webpage (auto-generated)
 │       ├── data/
-│       │   └── discovered_idracs.json      # Server database (auto-generated)
+│       │   ├── discovered_idracs.json      # Server database (auto-generated)
+│       │   └── admin_config.json           # Admin email & SSH key status
 │       └── downloads/
-│           └── *.command                   # 🔥 Easy-click buttons (auto-generated)
+│           ├── *.command                   # 🔥 Easy-click buttons (auto-generated)
+│           ├── generate-ssh-key.command    # SSH key generation script
+│           └── deploy-ssh-keys.command     # SSH deployment script
 ├── docs/                                  # Documentation  
 ├── .gitignore                             # Excludes generated output files
 └── README.md                              # This file
@@ -153,6 +179,28 @@ That's pretty much it - the script handles everything else automatically!
 - Does not affect host system time permanently
 - Temporary Chrome profiles are cleaned up automatically
 - Designed for legitimate network administration tasks
+
+## Development Workflow
+
+### Smart Commit Command
+
+This project includes a custom Claude Code command for streamlined version management:
+
+```bash
+/project:commit
+```
+
+The smart commit command automatically:
+- Detects commit type (patch/minor/major) from file changes
+- Increments version numbers appropriately
+- Updates CHANGELOG.md with new version entry
+- Creates properly formatted git commits with Claude Code attribution
+
+Usage examples:
+- Auto-commit: `/project:commit`
+- Force version type: `/project:commit minor`
+- Custom message: `/project:commit -m "Fix SSL issue" patch`
+- Preview changes: `/project:commit --dry-run`
 
 ## License
 

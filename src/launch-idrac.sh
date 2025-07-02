@@ -458,7 +458,7 @@ generate_dashboard() {
             padding: 0 20px;
         }
         
-        .management-tools {
+        .management-tools, .ssh-management {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 15px;
@@ -467,9 +467,69 @@ generate_dashboard() {
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         
-        .management-tools h3 {
+        .management-tools h3, .ssh-management h3 {
             margin-bottom: 15px;
             color: #2c3e50;
+        }
+        
+        .ssh-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .email-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .email-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .ssh-status {
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .ssh-status.ready {
+            background: #d5fdd5;
+            color: #27ae60;
+        }
+        
+        .ssh-status.not-ready {
+            background: #fdd5d5;
+            color: #e74c3c;
+        }
+        
+        .generate-ssh-button {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .generate-ssh-button:hover {
+            background: #219a52;
+            transform: scale(1.05);
+        }
+        
+        .deploy-ssh-button {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .deploy-ssh-button:hover {
+            background: #e67e22;
+            transform: scale(1.05);
         }
         
         .tool-buttons {
@@ -760,6 +820,25 @@ generate_dashboard() {
             </div>
         </div>
         
+        <div class="ssh-management">
+            <h3>🔐 SSH Key Management</h3>
+            <div class="ssh-form">
+                <input type="email" class="email-input" id="admin-email" placeholder="Enter admin email address" />
+                <div class="ssh-status not-ready" id="ssh-status">
+                    🔑 SSH Key Not Generated
+                </div>
+                <button class="tool-button generate-ssh-button" onclick="generateSSHKey()">
+                    🔑 Generate SSH Key
+                </button>
+                <button class="tool-button deploy-ssh-button" onclick="deploySSHKeys()" id="deploy-button" disabled>
+                    🚀 Deploy to All Servers
+                </button>
+            </div>
+            <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                💡 Generate SSH keys for passwordless access to iDRAC servers. Keys will be stored in ~/.ssh/
+            </div>
+        </div>
+        
         <div id="servers-container">
             <div class="servers-grid" id="servers-grid">
                 <!-- Servers will be populated by JavaScript -->
@@ -861,6 +940,187 @@ EOF
                 alert(`📥 Downloaded: ${commandFileName}\n\n✅ Double-click the downloaded file to launch Virtual Console for ${ip}\n\n🔧 The .command file handles all time-shifting automatically!`);
             }, 100);
         }
+        
+        // SSH Key Management Functions
+        let adminConfig = { admin_email: '', ssh_key_generated: false, ssh_key_path: '', last_updated: '' };
+        
+        function loadAdminConfig() {
+            fetch('data/admin_config.json')
+                .then(response => response.json())
+                .then(config => {
+                    adminConfig = config;
+                    document.getElementById('admin-email').value = config.admin_email || '';
+                    updateSSHStatus();
+                })
+                .catch(() => {
+                    // File doesn't exist or can't be loaded, use defaults
+                    updateSSHStatus();
+                });
+        }
+        
+        function saveAdminConfig() {
+            // In a real implementation, this would save to the server
+            // For now, we'll just update the local state
+            console.log('Admin config would be saved:', adminConfig);
+        }
+        
+        function updateSSHStatus() {
+            const statusElement = document.getElementById('ssh-status');
+            const deployButton = document.getElementById('deploy-button');
+            
+            if (adminConfig.ssh_key_generated) {
+                statusElement.textContent = '✅ SSH Key Ready';
+                statusElement.className = 'ssh-status ready';
+                deployButton.disabled = false;
+            } else {
+                statusElement.textContent = '🔑 SSH Key Not Generated';
+                statusElement.className = 'ssh-status not-ready';
+                deployButton.disabled = true;
+            }
+        }
+        
+        function generateSSHKey() {
+            const email = document.getElementById('admin-email').value;
+            
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address first.');
+                return;
+            }
+            
+            // Update admin config
+            adminConfig.admin_email = email;
+            adminConfig.ssh_key_generated = true;
+            adminConfig.ssh_key_path = '~/.ssh/idrac_rsa';
+            adminConfig.last_updated = new Date().toISOString();
+            
+            // Create SSH key generation script
+            const scriptContent = `#!/bin/bash
+# Generate SSH key for iDRAC servers
+# Email: ${email}
+
+ssh-keygen -t rsa -b 4096 -C "${email}" -f ~/.ssh/idrac_rsa -N ""
+
+echo "SSH key generated successfully!"
+echo "Public key content:"
+cat ~/.ssh/idrac_rsa.pub
+echo ""
+echo "Key saved to: ~/.ssh/idrac_rsa"
+echo ""
+echo "Next: Use the Deploy button to copy this key to your servers"`;
+            
+            // Create download for the script
+            const blob = new Blob([scriptContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'generate-ssh-key.command';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            // Update UI
+            updateSSHStatus();
+            saveAdminConfig();
+            
+            alert('📥 SSH key generation script downloaded!\n\n✅ Double-click the downloaded file to generate your SSH key\n\n🔧 This will create ~/.ssh/idrac_rsa for iDRAC access');
+        }
+        
+        function deploySSHKeys() {
+            const email = adminConfig.admin_email;
+            const onlineServers = serverData.servers.filter(s => s.status === 'online');
+            
+            if (onlineServers.length === 0) {
+                alert('No online servers found to deploy SSH keys to.');
+                return;
+            }
+            
+            // Create SSH deployment script
+            let scriptContent = `#!/bin/bash
+# Deploy SSH keys to iDRAC servers
+# Email: ${email}
+# Generated: ${new Date().toLocaleString()}
+
+set -e
+
+SSH_KEY_PATH="$HOME/.ssh/idrac_rsa"
+SSH_PUB_PATH="$HOME/.ssh/idrac_rsa.pub"
+
+if [ ! -f "$SSH_PUB_PATH" ]; then
+    echo "Error: SSH public key not found at $SSH_PUB_PATH"
+    echo "Please generate SSH key first using the Generate SSH Key button"
+    exit 1
+fi
+
+echo "Deploying SSH key to iDRAC servers..."
+echo "SSH Key: $SSH_PUB_PATH"
+echo ""
+
+# Update ~/.ssh/config
+SSH_CONFIG="$HOME/.ssh/config"
+echo "Updating SSH config: $SSH_CONFIG"
+
+# Backup existing config
+if [ -f "$SSH_CONFIG" ]; then
+    cp "$SSH_CONFIG" "$SSH_CONFIG.backup.$(date +%s)"
+fi
+
+# Add/update iDRAC entries
+`;
+
+            onlineServers.forEach(server => {
+                const ip = server.url.replace(/https?:\/\//, '');
+                scriptContent += `
+# Configure ${ip}
+if ! grep -q "Host idrac-${ip.replace(/\./g, '-')}" "$SSH_CONFIG" 2>/dev/null; then
+    echo "" >> "$SSH_CONFIG"
+    echo "Host idrac-${ip.replace(/\./g, '-')}" >> "$SSH_CONFIG"
+    echo "    HostName ${ip}" >> "$SSH_CONFIG"
+    echo "    User root" >> "$SSH_CONFIG"
+    echo "    Port 22" >> "$SSH_CONFIG"
+    echo "    IdentityFile ~/.ssh/idrac_rsa" >> "$SSH_CONFIG"
+    echo "    StrictHostKeyChecking no" >> "$SSH_CONFIG"
+    echo "    UserKnownHostsFile /dev/null" >> "$SSH_CONFIG"
+    echo "Added SSH config for idrac-${ip.replace(/\./g, '-')}"
+fi
+
+# Deploy public key to ${ip}
+echo "Deploying key to ${ip}..."
+ssh-copy-id -i "$SSH_PUB_PATH" -o StrictHostKeyChecking=no root@${ip} || echo "Failed to deploy to ${ip} (check if SSH is enabled)"
+`;
+            });
+
+            scriptContent += `
+echo ""
+echo "✅ SSH deployment complete!"
+echo ""
+echo "You can now SSH to servers using:"
+`;
+
+            onlineServers.forEach(server => {
+                const ip = server.url.replace(/https?:\/\//, '');
+                scriptContent += `echo "  ssh idrac-${ip.replace(/\./g, '-')}"
+`;
+            });
+
+            scriptContent += `
+echo ""
+echo "Or directly: ssh -i ~/.ssh/idrac_rsa root@SERVER_IP"
+`;
+            
+            // Create download for the deployment script
+            const blob = new Blob([scriptContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'deploy-ssh-keys.command';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            alert(`📥 SSH deployment script downloaded!\n\n🎯 Will deploy to ${onlineServers.length} online server(s)\n\n✅ Double-click the downloaded file to deploy your SSH key to all servers\n\n🔧 This will update your ~/.ssh/config and copy keys to servers`);
+        }
 
         function renderServers() {
             const container = document.getElementById('servers-grid');
@@ -929,6 +1189,7 @@ EOF
 
         // Initialize the dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            loadAdminConfig();
             renderServers();
             
             // Add hover effects

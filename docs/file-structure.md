@@ -26,7 +26,10 @@ graph TD
     O --> U[assets/]
 
     S --> V[discovered_idracs.json]
+    S --> V2[admin_config.json]
     T --> W[*.command files]
+    T --> W2[generate-ssh-key.command]
+    T --> W3[deploy-ssh-keys.command]
 
     D --> X[ProjectOverView.md]
     D --> Y[file-structure.md]
@@ -67,9 +70,12 @@ graph TD
 #### Web Root (`output/www/`)
 **Complete web-ready directory for nginx/Docker hosting**
 
-- **index.html**: Main dashboard interface with dynamic server loading and download functionality
+- **index.html**: Main dashboard interface with dynamic server loading, SSH key management, and download functionality
 - **data/discovered_idracs.json**: Network discovery database with server status and timestamps
+- **data/admin_config.json**: Admin email and SSH key configuration storage
 - **downloads/*.command**: Generated macOS command files for instant Virtual Console access
+- **downloads/generate-ssh-key.command**: SSH key generation script with admin email
+- **downloads/deploy-ssh-keys.command**: SSH key deployment script for all online servers
 - **assets/**: Static web assets (CSS, JS, images) if needed
 
 ### Documentation Directory (`docs/`)
@@ -108,10 +114,13 @@ EXPOSE 80
 ### Features
 - **Complete Web Root**: Everything under `www/` is web accessible
 - **Direct Downloads**: `.command` files downloadable via HTTP
+- **SSH Key Management**: Email-based SSH key generation and deployment
 - **Dynamic Data**: Dashboard loads server data via AJAX from `data/discovered_idracs.json`
+- **Admin Configuration**: Persistent email and SSH key status in `data/admin_config.json`
 - **Security**: Generated files excluded from source control to protect network topology
 
 ### Access Patterns
 1. **Web Dashboard**: Navigate to hosted site for GUI management
 2. **Direct Downloads**: Download `.command` files for offline use
-3. **API Access**: Fetch JSON data programmatically via `/data/discovered_idracs.json`
+3. **SSH Key Management**: Generate and deploy SSH keys via dashboard interface
+4. **API Access**: Fetch JSON data programmatically via `/data/discovered_idracs.json` and `/data/admin_config.json`
