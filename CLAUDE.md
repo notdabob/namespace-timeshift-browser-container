@@ -4,185 +4,228 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a macOS solution for accessing iDRAC6 servers with expired SSL certificates using time-shifted environments. The project creates isolated namespaces with manipulated system time to allow connections to legacy Dell iDRAC6 interfaces that have expired certificates.
+This is a containerized solution for managing Dell iDRAC servers through a professional web dashboard deployed on Proxmox. The project eliminates macOS quarantine issues by providing a centralized, browser-based management interface that runs as a Docker container.
 
 ## Key Components
 
-- **launch-idrac.sh**: Main all-in-one script that handles everything automatically
-- **time-shift-idrac.zsh**: Legacy script for manual namespace time manipulation
-- **MacOS-faketime-browser.zsh**: Simple browser time-shifting example
-- **launch-virtual-console.sh**: Direct Virtual Console launcher with time shifting
-- **generate_easy_buttons.sh**: Creates .command files for instant access (integrated into main script)
-- **viewer.jnlp**: iDRAC6 Virtual Console client configuration file
-- **discovered_idracs.json**: Auto-generated database of discovered servers
-- **idrac-dashboard.html**: Auto-generated web dashboard for server management
+### Container Infrastructure
+- **Dockerfile**: Multi-service container with nginx, Python API, and network scanner
+- **deploy-proxmox.sh**: One-command deployment script for Proxmox hosts
+- **docker/**: Container configuration files (nginx.conf, supervisord.conf, start.sh)
+- **requirements.txt**: Python dependencies for container services
+
+### Application Services
+- **idrac-container-api.py**: REST API server for SSH key management and server operations
+- **network-scanner.py**: Automated iDRAC discovery service that scans every 5 minutes  
+- **dashboard-generator.py**: Creates responsive web interface for server management
+
+### Documentation
+- **README.md**: Main documentation with deployment instructions
+- **PROXMOX-SETUP.md**: Detailed setup guide and troubleshooting
+- **DEPLOYMENT-SUMMARY.md**: Quick reference for deployment
 
 ## Core Architecture
 
-The solution uses namespace isolation on macOS to create time-shifted environments:
+The solution uses a multi-service Docker container architecture:
 
-1. **Namespace Creation**: Uses `unshare -m -t -p -f` to create isolated mount, time, and PID namespaces
-2. **Time Manipulation**: Sets system time to 2020-01-01 within the namespace using `gdate`
-3. **Library Injection**: Uses `libfaketime.dylib` via `DYLD_INSERT_LIBRARIES` for process time spoofing
-4. **Java Integration**: Configures Java processes with faketime agent for JNLP file handling
-5. **Browser Launch**: Starts Chrome with temporary profile in the time-shifted environment
+1. **Container Host**: Proxmox VE server with Docker runtime
+2. **Web Server**: nginx serving dashboard on port 8080
+3. **API Server**: Python Flask API on port 8765 for management operations
+4. **Network Discovery**: Background service scanning for iDRAC servers
+5. **Data Persistence**: Docker volumes for server database and SSH keys
+
+### Service Architecture
+```
+┌─────────────────────────────────────┐
+│ Proxmox Host                        │
+│ ┌─────────────────────────────────┐ │
+│ │ iDRAC Manager Container         │ │
+│ │ ┌─────────────┐ ┌─────────────┐ │ │
+│ │ │ nginx       │ │ Python API  │ │ │
+│ │ │ (Port 80)   │ │ (Port 8765) │ │ │
+│ │ └─────────────┘ └─────────────┘ │ │
+│ │ ┌─────────────┐ ┌─────────────┐ │ │
+│ │ │ Dashboard   │ │ Network     │ │ │
+│ │ │ Generator   │ │ Scanner     │ │ │
+│ │ └─────────────┘ └─────────────┘ │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+```
 
 ## Dependencies
 
-The project requires several macOS tools installed via Homebrew:
+The container automatically installs and manages all dependencies:
 
-- `coreutils` (provides `unshare` and `gdate`)
-- `libfaketime` (for time manipulation)
-- Chrome (for browser access)
-- Java runtime (for JNLP execution)
+### System Dependencies (via apt)
+- `openssh-client` (SSH key management)
+- `nmap` (network scanning) 
+- `curl`, `jq` (HTTP requests and JSON processing)
+- `nginx` (web server)
+- `supervisor` (service management)
 
-## Key Environment Variables
+### Python Dependencies (via pip)
+- `flask` (API server framework)
+- `requests` (HTTP client)
+- `paramiko` (SSH operations)
+- `python-nmap` (network scanning)
 
-- `DYLD_INSERT_LIBRARIES`: Points to libfaketime.dylib
-- `FAKETIME`: Target date/time for spoofing
-- `JAVA_TOOL_OPTIONS`: Java agent configuration for time manipulation
+### Runtime Environment
+- Python 3.11
+- Docker container runtime
+- Proxmox VE host system
 
 ## Usage Pattern
 
-The main script (`launch-idrac.sh`) provides a complete automated workflow:
+The deployment follows a simple git-based pattern:
 
-1. **Dependency Management**: Auto-installs Homebrew, coreutils, libfaketime, jq, Chrome
-2. **Network Discovery**: Scans local network for iDRAC servers on ports 80/443
-3. **Dashboard Generation**: Creates HTML interface showing all discovered servers
-4. **Easy Access Creation**: Generates .command files for one-click Virtual Console access
-5. **SSH Key Management**: Provides email-based SSH key generation and deployment
-6. **Time-Shifted Environment**: Launches Chrome with system time set to 2020-01-01 12:00:00
-7. **Automatic Cleanup**: Environment cleans up automatically on exit
+1. **Clone Repository**: `git clone` from GitHub to Proxmox host
+2. **Deploy Container**: Run `./deploy-proxmox.sh deploy`
+3. **Access Dashboard**: Browse to `http://proxmox-ip:8080`
+4. **Automatic Operations**: Container handles discovery, SSH keys, and management
 
-### Three Access Methods
+### Primary Deployment Workflow
 
-- **Web Dashboard**: Click servers in the HTML interface
-- **Easy-Click Buttons**: Double-click .command files in Finder
-- **Direct Commands**: Use command-line scripts manually
+```bash
+# SSH to Proxmox host
+ssh root@proxmox-host
 
-### Default Credentials
+# Clone repository from GitHub
+git clone https://github.com/notdabob/namespace-timeshift-browser-container.git
+cd namespace-timeshift-browser-container
 
-- **Username**: root
-- **Password**: calvin
-  (Standard Dell iDRAC6 factory defaults)
+# Deploy container
+./deploy-proxmox.sh deploy
 
-### SSH Key Management
+# Access via browser
+http://PROXMOX-IP:8080
+```
 
-- **Generate SSH Key**: Creates RSA 4096-bit key pair with admin email
-- **Deploy to Servers**: Updates ~/.ssh/config and copies keys to all online servers
-- **SSH Aliases**: Servers accessible as `idrac-192-168-1-23` format
-- **Key Location**: `~/.ssh/idrac_rsa` (private) and `~/.ssh/idrac_rsa.pub` (public)
+### Container Management
+
+```bash
+# Status monitoring
+./deploy-proxmox.sh status
+./deploy-proxmox.sh logs
+
+# Maintenance
+./deploy-proxmox.sh update
+./deploy-proxmox.sh cleanup
+
+# Direct Docker commands
+docker ps | grep idrac-manager
+docker logs idrac-manager
+docker exec -it idrac-manager bash
+```
 
 ## Common Development Commands
 
-### Running the Main Script
+### Container Deployment
 
 ```bash
-./src/launch-idrac.sh
+# Full deployment (installs Docker if needed)
+./deploy-proxmox.sh deploy
+
+# Check deployment status
+./deploy-proxmox.sh status
+
+# View real-time logs
+./deploy-proxmox.sh logs
 ```
 
-The primary entry point that handles everything automatically. Now located in `src/` directory.
-
-### Manual Component Scripts
+### Container Development
 
 ```bash
-./src/launch-virtual-console.sh <IP_ADDRESS>    # Direct Virtual Console access
-./src/launch-timeshift-browser.sh               # Browser-only time shifting
-./src/generate_easy_buttons.sh                  # Generate .command files
+# Build container image
+docker build -t idrac-manager:latest .
+
+# Run container manually for testing
+docker run -d --name idrac-test -p 8080:80 -p 8765:8765 idrac-manager:latest
+
+# Enter container for debugging
+docker exec -it idrac-manager bash
+
+# Check service status within container
+docker exec -it idrac-manager supervisorctl status
 ```
 
-### Making Scripts Executable
+### API Testing
 
 ```bash
-chmod +x src/*.sh
+# Test API server status
+curl http://localhost:8765/status
+
+# Test network scanner manually
+docker exec -it idrac-manager python3 /app/src/network-scanner.py
+
+# Check discovered servers
+curl http://localhost:8080/data/discovered_idracs.json
 ```
 
-### Testing and Validation
+### Service Management
 
 ```bash
-# Test specific iDRAC connection
-./src/launch-virtual-console.sh 192.168.1.23
+# Restart all services
+docker restart idrac-manager
 
-# Verify libfaketime installation
-ls -la /opt/homebrew/Cellar/libfaketime/*/lib/faketime/libfaketime.1.dylib
+# Restart specific service within container
+docker exec -it idrac-manager supervisorctl restart idrac-api
+docker exec -it idrac-manager supervisorctl restart network-scanner
 
-# Check generated files structure
-ls -la output/www/downloads/*.command           # Easy-click buttons
-cat output/www/data/discovered_idracs.json | jq '.'  # Server database
-cat output/www/data/admin_config.json | jq '.'      # Admin configuration
-
-# Test web dashboard locally
-open output/www/index.html                      # Open dashboard in browser
-
-# Test SSH key management (after generation)
-ls -la ~/.ssh/idrac_rsa*                       # Check SSH keys
-cat ~/.ssh/config | grep -A 8 "Host idrac-"    # Check SSH config entries
-```
-
-### Web Development and Testing
-
-```bash
-# Start local web server for testing (optional)
-cd output/www && python3 -m http.server 8080
-
-# View generated web files
-ls -la output/www/                              # Web root contents
-ls -la output/www/data/                         # JSON data files
-ls -la output/www/downloads/                    # Downloadable .command files
+# Check nginx configuration
+docker exec -it idrac-manager nginx -t
 ```
 
 ## Development Notes
 
-### Script Dependencies
+### Container Architecture
 
-All scripts automatically check and install dependencies via Homebrew. Manual installation is rarely needed, but core dependencies include:
+The solution uses a single container with multiple services managed by Supervisor:
 
-- `brew install coreutils libfaketime jq`
-- Chrome browser (auto-downloaded if missing)
-- Java runtime (for JNLP handling)
-
-### Testing Network Discovery
-
-The main script scans ports 80/443 on the local network. For testing specific IPs:
-
-```bash
-# Test direct IP access
-./launch-virtual-console.sh 192.168.1.23
-```
+- **nginx**: Web server and reverse proxy
+- **idrac-api**: Python Flask API server
+- **network-scanner**: Background discovery service
+- **cron**: Scheduled tasks
 
 ### Generated Files
 
-The system auto-generates several files in the `output/` directory during operation:
+The container automatically generates files in `/app/www/`:
 
-- `output/www/data/discovered_idracs.json`: Server database with timestamps
-- `output/www/data/admin_config.json`: Admin email and SSH key configuration
-- `output/www/index.html`: Web interface dashboard
-- `src/jnlp-interceptor.sh`: JNLP file handler (in source directory)
-- `output/www/downloads/launch-virtual-console-*.command`: Easy-click access files
-- `output/www/downloads/generate-ssh-key.command`: SSH key generation script
-- `output/www/downloads/deploy-ssh-keys.command`: SSH key deployment script
+- `/app/www/index.html`: Main dashboard interface
+- `/app/www/data/discovered_idracs.json`: Server database
+- `/app/www/data/admin_config.json`: SSH key configuration
+- `/app/www/downloads/`: Connection scripts for users
+
+### Data Persistence
+
+All persistent data is stored in Docker volumes:
+
+- **idrac-data**: Server database and configuration
+- **SSH keys**: Stored in `/root/.ssh/` within container
+- **Logs**: Available via `docker logs` and `/app/logs/`
+
+### Network Requirements
+
+The container requires network access to:
+
+- iDRAC servers on ports 80/443 (discovery and web access)
+- iDRAC servers on port 22 (SSH key deployment)
+- Internet access for package installation (during build)
 
 ### File Organization
 
-**IMPORTANT**: For complete file structure details, always reference `docs/file-structure.md` as the authoritative source of project organization.
+**IMPORTANT**: For complete file structure details, always reference the README.md as the authoritative source of project organization.
 
-- **Source files** (`src/`): Scripts and development files
-- **Generated output** (`output/www/`): Web-ready files for hosting
-- **Input materials** (`input/diagnostics/`): User-provided debugging materials (screenshots, etc.)
-- **Documentation** (`docs/`): Project documentation and diagrams
-- **Security**: All generated files and input materials are excluded from git via `.gitignore`
+- **Container files**: `Dockerfile`, `requirements.txt`, `docker/`
+- **Application services**: `src/idrac-container-api.py`, `src/network-scanner.py`, `src/dashboard-generator.py`
+- **Documentation**: `README.md`, `PROXMOX-SETUP.md`, `DEPLOYMENT-SUMMARY.md`
+- **Legacy files**: Old macOS scripts are deprecated and excluded from container builds
 
-### Debugging Time Issues
+### Security Considerations
 
-If SSL certificates still appear invalid:
-
-1. Verify `libfaketime` is properly loaded in the environment
-2. Check that `FAKETIME` environment variable is set to "2020-01-01 12:00:00"
-3. Ensure Chrome is launched from the time-shifted script, not directly
-
-## Security Context
-
-This tool is designed for legitimate network administration tasks to access legacy Dell iDRAC6 hardware that cannot be updated. The time manipulation is contained within isolated namespaces and does not affect the host system permanently.
+- **Container Isolation**: All services run within Docker container
+- **Network Security**: API server only accessible from Proxmox host
+- **SSH Key Security**: Keys stored securely within container filesystem
+- **Default Credentials**: Standard iDRAC defaults (root/calvin)
 
 ## Documentation Maintenance Requirements
 
@@ -213,7 +256,7 @@ Automated version management and commit creation:
 
 Features:
 - **Auto-detection**: Analyzes file changes to determine appropriate version increment
-- **Version Management**: Updates VERSION file and CHANGELOG.md automatically
+- **Version Management**: Updates CHANGELOG.md automatically
 - **Smart Messages**: Generates contextual commit messages based on changes
 - **Claude Attribution**: Includes proper Claude Code attribution in commits
 
@@ -222,10 +265,99 @@ Features:
 - `minor`: New features, script additions, significant enhancements
 - `major`: Breaking changes, major architectural updates
 
-- **Command template example:**
+## Troubleshooting Common Issues
 
-  ```markdown
-  # .claude/commands/optimize.md
+### Container Won't Start
 
-  Analyze this code for performance issues and suggest optimizations:
-  ```
+```bash
+# Check system resources
+docker system df
+df -h
+
+# Verify Docker is running
+systemctl status docker
+
+# Check container logs
+docker logs idrac-manager
+```
+
+### Network Discovery Issues
+
+```bash
+# Test network scanning manually
+docker exec -it idrac-manager python3 /app/src/network-scanner.py
+
+# Check container network connectivity
+docker exec -it idrac-manager ping 192.168.1.1
+
+# Verify port accessibility
+docker exec -it idrac-manager nmap -p 80,443 192.168.1.1-254
+```
+
+### Dashboard Access Issues
+
+```bash
+# Check nginx status
+docker exec -it idrac-manager nginx -t
+docker exec -it idrac-manager supervisorctl status nginx
+
+# Test API server
+curl http://localhost:8765/status
+
+# Check file permissions
+docker exec -it idrac-manager ls -la /app/www/
+```
+
+### SSH Key Management Issues
+
+```bash
+# Test SSH connectivity
+docker exec -it idrac-manager ssh -o ConnectTimeout=10 root@idrac-ip
+
+# Check SSH key files
+docker exec -it idrac-manager ls -la /root/.ssh/
+
+# Verify SSH service on iDRAC
+# Enable SSH in iDRAC web interface: iDRAC Settings → Network → Services → SSH
+```
+
+## Migration from Legacy macOS Solution
+
+If migrating from the previous macOS time-shifting solution:
+
+1. **No Time Manipulation**: Container solution works with current SSL certificates
+2. **No Local Dependencies**: No need for Homebrew, libfaketime, or Chrome
+3. **Centralized Access**: Replace local .command files with web dashboard
+4. **SSH Key Migration**: Transfer existing SSH keys to container if needed
+
+The container solution completely eliminates the macOS quarantine problem by providing browser-based access instead of downloadable files.
+
+## GitHub Integration
+
+**Repository**: https://github.com/notdabob/namespace-timeshift-browser-container
+
+### Development Workflow with GitHub
+
+1. **Clone repository**: `git clone https://github.com/notdabob/namespace-timeshift-browser-container.git`
+2. **Create feature branch**: `git checkout -b feature-name`
+3. **Make changes**: Edit source files and test locally
+4. **Test deployment**: Use `./deploy-proxmox.sh update` to test changes
+5. **Commit changes**: Use `/project:commit` for proper versioning
+6. **Push and create PR**: `git push origin feature-name` then create Pull Request
+7. **Merge to main**: After review, merge PR to main branch
+8. **Deploy updates**: Users run `git pull && ./deploy-proxmox.sh update`
+
+### Version Management
+
+The project uses semantic versioning managed through:
+- **CHANGELOG.md**: Tracks all version changes and features
+- **Git tags**: Release versions are tagged in Git
+- **Claude Commands**: `/project:commit` automates version bumps
+
+### Repository Structure for GitHub
+
+- **main branch**: Stable, deployable code
+- **feature branches**: Development work
+- **releases**: Tagged versions for stable deployments
+- **issues**: Bug reports and feature requests
+- **discussions**: Community Q&A and support

@@ -2,125 +2,187 @@
 
 ```mermaid
 graph TD
-    A[namespace-timeshift-browser-container/] --> B[src/]
-    A --> C[output/]
-    A --> D[docs/]
-    A --> E[input/]
-    A --> F[README.md]
-    A --> G[.gitignore]
-    A --> H[CLAUDE.md]
-    A --> I[VERSION]
-
-    B --> J[launch-idrac.sh]
-    B --> K[launch-virtual-console.sh]
-    B --> L[launch-timeshift-browser.sh]
-    B --> M[generate_easy_buttons.sh]
-    B --> N[jnlp-interceptor.sh]
-
-    C --> O[www/]
-    C --> P[tmp/]
-    C --> Q[logs/]
-    O --> R[index.html]
-    O --> S[data/]
-    O --> T[downloads/]
-    O --> U[assets/]
-
-    S --> V[discovered_idracs.json]
-    S --> V2[admin_config.json]
-    T --> W[*.command files]
-    T --> W2[generate-ssh-key.command]
-    T --> W3[deploy-ssh-keys.command]
-
-    D --> X[ProjectOverView.md]
-    D --> Y[file-structure.md]
-
-    E --> Z[diagnostics/]
-    Z --> AA[screenshots/]
-    AA --> BB[error/]
-    AA --> CC[success/]
-    AA --> DD[inspiration/]
+    A[namespace-timeshift-browser-container/] --> B[Container Files]
+    A --> C[Application Services]
+    A --> D[Documentation]
+    A --> E[Development Tools]
+    
+    B --> F[Dockerfile]
+    B --> G[requirements.txt]
+    B --> H[deploy-proxmox.sh]
+    B --> I[docker/]
+    I --> I1[nginx.conf]
+    I --> I2[supervisord.conf]
+    I --> I3[start.sh]
+    
+    C --> J[src/]
+    J --> J1[idrac-container-api.py]
+    J --> J2[network-scanner.py]
+    J --> J3[dashboard-generator.py]
+    
+    D --> K[README.md]
+    D --> L[CLAUDE.md]
+    D --> M[PROXMOX-SETUP.md]
+    D --> N[DEPLOYMENT-SUMMARY.md]
+    D --> O[docs/]
+    O --> O1[file-structure.md]
+    O --> O2[CHANGELOG.md]
+    
+    E --> P[.claude/]
+    P --> P1[commands/]
+    P1 --> P2[commit.md]
+    E --> Q[.gitignore]
+    E --> R[.dockerignore]
 
     style A fill:#e1f5fe
     style B fill:#f3e5f5
     style C fill:#fff3e0
     style D fill:#f0f8ff
     style E fill:#ffe0e6
-    style O fill:#e8f5e8
-    style J fill:#ffebcd
-    style K fill:#ffebcd
-    style L fill:#ffebcd
-    style M fill:#ffebcd
-    style N fill:#ffebcd
+    style F fill:#ffebcd
+    style G fill:#ffebcd
+    style H fill:#ffebcd
 ```
 
 ## File Descriptions
 
-### Source Directory (`src/`)
-**Scripts for time-shifted iDRAC access - not web accessible**
+### Container Infrastructure
 
-- **launch-idrac.sh**: Main all-in-one script with dependency management, network scanning, and dashboard generation
-- **launch-virtual-console.sh**: Direct Virtual Console launcher with time shifting for specific IP addresses
-- **launch-timeshift-browser.sh**: Browser-only time shifting for manual iDRAC access
-- **generate_easy_buttons.sh**: Creates downloadable .command files for one-click Virtual Console access
-- **jnlp-interceptor.sh**: JNLP file handler that applies time manipulation to Java processes
+**Core container files for Proxmox deployment**
 
-### Output Directory (`output/`)
-**Generated files - excluded from source control via .gitignore**
+- **Dockerfile**: Multi-service container definition with nginx, Python API, and network scanner
+- **requirements.txt**: Python dependencies (flask, requests, paramiko, python-nmap)
+- **deploy-proxmox.sh**: One-command deployment script for Proxmox hosts
+- **.dockerignore**: Excludes unnecessary files from container builds
 
-#### Web Root (`output/www/`)
-**Complete web-ready directory for nginx/Docker hosting**
+#### Docker Configuration (`docker/`)
+- **nginx.conf**: Web server configuration with API proxy and static file serving
+- **supervisord.conf**: Service management for running multiple processes in container
+- **start.sh**: Container startup script that initializes services and data
 
-- **index.html**: Main dashboard interface with dynamic server loading, SSH key management, and download functionality
-- **data/discovered_idracs.json**: Network discovery database with server status and timestamps
-- **data/admin_config.json**: Admin email and SSH key configuration storage
-- **downloads/*.command**: Generated macOS command files for instant Virtual Console access
-- **downloads/generate-ssh-key.command**: SSH key generation script with admin email
-- **downloads/deploy-ssh-keys.command**: SSH key deployment script for all online servers
-- **assets/**: Static web assets (CSS, JS, images) if needed
+### Application Services (`src/`)
 
-### Documentation Directory (`docs/`)
+**Python services that run within the container**
 
-- **ProjectOverView.md**: Project requirements and technical specifications
-- **file-structure.md**: This file - visual project structure diagram with web-ready organization
+- **idrac-container-api.py**: Flask REST API server for SSH key management and server operations
+- **network-scanner.py**: Automated iDRAC discovery service that scans network every 5 minutes
+- **dashboard-generator.py**: Creates responsive web interface for server management
 
-### Input Directory (`input/`)
-**User-provided materials for debugging and development - excluded from source control**
+### Documentation
 
-#### Diagnostics (`input/diagnostics/`)
-**Organized debugging materials for development assistance**
+**User and developer documentation**
 
-- **screenshots/error/**: Error screenshots for troubleshooting SSL certificates, browser issues, etc.
-- **screenshots/success/**: Success state screenshots showing working configurations
-- **screenshots/inspiration/**: Visual references and design ideas for UI/UX improvements
+- **README.md**: Main documentation with deployment instructions and feature overview
+- **CLAUDE.md**: Development guidance for Claude Code instances with troubleshooting
+- **PROXMOX-SETUP.md**: Detailed setup guide with advanced configuration options
+- **DEPLOYMENT-SUMMARY.md**: Quick reference for one-command deployment
 
-### Root Directory
+#### Extended Documentation (`docs/`)
+- **file-structure.md**: This file - project organization and architecture
+- **CHANGELOG.md**: Version history and feature additions
 
-- **README.md**: Installation instructions, usage workflow, and troubleshooting guide
-- **CLAUDE.md**: Development guidance for Claude Code instances
-- **VERSION**: Semantic version tracking for releases
-- **.gitignore**: Excludes generated output files and temporary input materials
+### Development Tools
 
-## Web Hosting Ready Structure
+**Version control and development workflow**
 
-The `output/www/` directory is designed for direct web hosting:
+- **.gitignore**: Excludes generated files, logs, and sensitive data
+- **.dockerignore**: Container build optimization
 
-### Docker Deployment
-```dockerfile
-FROM nginx:alpine
-COPY output/www/ /usr/share/nginx/html/
-EXPOSE 80
+#### Claude Code Commands (`.claude/`)
+- **commands/commit.md**: Smart commit command for automated version management
+
+## Container Architecture
+
+The solution uses a single Docker container with multiple managed services:
+
+### Runtime Structure
+```
+Container (idrac-manager)
+├── nginx (Port 80) ──────────► Web Dashboard
+├── Python API (Port 8765) ───► REST API
+├── Network Scanner ──────────► Auto-discovery
+└── Supervisor ───────────────► Service Management
 ```
 
-### Features
-- **Complete Web Root**: Everything under `www/` is web accessible
-- **Direct Downloads**: `.command` files downloadable via HTTP
-- **SSH Key Management**: Email-based SSH key generation and deployment
-- **Dynamic Data**: Dashboard loads server data via AJAX from `data/discovered_idracs.json`
-- **Admin Configuration**: Persistent email and SSH key status in `data/admin_config.json`
-- **Security**: Generated files excluded from source control to protect network topology
+### Data Flow
+```
+User Browser ──► nginx ──► Static Dashboard
+     │
+     └── API Calls ──► Python API ──► iDRAC Operations
+                                 │
+                                 └── SSH Key Management
+                                 └── Server Discovery
+```
 
-### Access Patterns
-1. **Web Dashboard**: Navigate to hosted site for GUI management
-2. **Direct Downloads**: Download `.command` files for offline use
-3. **SSH Key Management**: Generate and deploy SSH keys via dashboard interface
-4. **API Access**: Fetch JSON data programmatically via `/data/discovered_idracs.json` and `/data/admin_config.json`
+### Generated Files (Runtime)
+
+The container creates files at runtime in `/app/www/`:
+
+- **index.html**: Main dashboard interface (generated by dashboard-generator.py)
+- **data/discovered_idracs.json**: Server database with timestamps and status
+- **data/admin_config.json**: SSH key configuration and admin settings
+- **downloads/**: User download area for connection scripts
+
+## Deployment Architecture
+
+### Proxmox Integration
+```
+Proxmox Host
+├── Docker Engine
+└── Container (idrac-manager)
+    ├── Port 8080 ──► External Web Access
+    ├── Port 8765 ──► Internal API (localhost only)
+    └── Volume ─────► Persistent Data Storage
+```
+
+### Network Requirements
+- **Host Network Access**: Container needs access to iDRAC servers on ports 80/443/22
+- **External Access**: Users access web dashboard via Proxmox host IP on port 8080
+- **Internal API**: API server only accessible from Proxmox host for security
+
+## Migration from Legacy Solution
+
+### Deprecated Files (Removed)
+- ~~launch-idrac.sh~~ (macOS time-shifting script)
+- ~~launch-virtual-console.sh~~ (Local virtual console launcher)
+- ~~launch-timeshift-browser.sh~~ (Browser time-shifting)
+- ~~run_unblock_and_execute.sh~~ (macOS quarantine workaround)
+- ~~generate_easy_buttons.sh~~ (Local .command file generator)
+
+### Architecture Changes
+- **From**: macOS local scripts with time manipulation
+- **To**: Containerized web services with direct SSL access
+- **Benefits**: No quarantine issues, network-wide access, professional deployment
+
+## Security Considerations
+
+- **Container Isolation**: All services run within Docker container boundaries
+- **Network Security**: API server only accessible from Proxmox host
+- **Data Persistence**: Sensitive data stored in Docker volumes, not in git
+- **SSH Key Security**: Keys generated and stored securely within container
+- **Access Control**: Web dashboard provides read-only server information to users
+
+## Development Workflow
+
+### Container Development
+1. **Edit source files**: Modify Python services in `src/`
+2. **Update container**: Run `./deploy-proxmox.sh update`
+3. **Test changes**: Access dashboard and verify functionality
+4. **Commit changes**: Use `/project:commit` for version management
+
+### Local Testing
+```bash
+# Build container locally
+docker build -t idrac-manager:test .
+
+# Run for testing
+docker run -d --name test-container -p 8080:80 -p 8765:8765 idrac-manager:test
+
+# Check logs
+docker logs test-container
+
+# Clean up
+docker stop test-container && docker rm test-container
+```
+
+This architecture provides a professional, enterprise-ready solution that completely eliminates macOS-specific issues while offering superior functionality and accessibility.

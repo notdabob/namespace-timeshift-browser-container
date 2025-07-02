@@ -1,207 +1,321 @@
-# Time-Shift iDRAC Solution
+# iDRAC Management Container
 
-A macOS solution for accessing iDRAC6 servers with expired SSL certificates using time-shifted environments.
+A containerized solution for managing Dell iDRAC servers through a professional web dashboard deployed on Proxmox.
 
 ## Overview
 
-This solution uses time manipulation to allow connections to legacy Dell iDRAC6 interfaces that have expired certificates. It uses `libfaketime` to create a secure, contained environment where applications see the system time as 2020-01-01, allowing SSL certificates from that era to be valid.
+This solution provides centralized iDRAC management through a Docker container that runs on your Proxmox host. It eliminates macOS quarantine issues, provides network-wide access, and offers a professional web-based management interface.
 
-## Prerequisites
+**Key Benefits:**
+- 🌐 **Access from any device** - Web dashboard works on phones, tablets, laptops
+- 🚫 **No macOS quarantine issues** - Everything is browser-based
+- 🔍 **Auto-discovery** - Finds all iDRAC servers automatically
+- 🔑 **SSH key management** - Generate and deploy keys with one click
+- 🖥️ **One-click console access** - Direct Virtual Console launching
+- 🐳 **Enterprise-ready** - Container-based deployment
 
-- macOS Ventura or later
-- Administrator privileges (may be needed for dependency installation)
-- Internet connection (for downloading dependencies)
+## 🚀 Quick Deployment
 
-## 🚀 One-Click Magic Solution
+### Prerequisites
 
-**This is now a single-click solution!** No setup, no multiple steps, just one click and you're done.
+- Proxmox VE 7.0 or later
+- Root access to Proxmox host
+- Git installed on Proxmox host (`apt update && apt install git`)
+- Network connectivity to iDRAC servers
 
-### Usage
+### One-Command Deployment
 
-1. **Run the main script**
-
-   ```bash
-   ./src/launch-idrac.sh
-   ```
-
-That's literally it! 🎉
-
-The script automatically:
-
-- ✅ Checks and installs ALL dependencies (Homebrew, Chrome, etc.)
-- ✅ Scans your network for iDRAC servers and tracks their status
-- ✅ Creates a beautiful dashboard with server management features
-- ✅ **NEW:** Generates easy-click .command files for instant Virtual Console access
-- ✅ **NEW:** SSH key management for passwordless server access
-- ✅ Opens time-shifted Chrome with valid SSL certificates
-- ✅ Shows you clickable links to all your iDRAC servers
-- ✅ Handles JNLP files automatically for Virtual Console access
-- ✅ Tracks when servers were first/last seen for easy management
-- ✅ Provides one-click cleanup of offline servers
-
-### Three Ways to Access iDRAC
-
-**🔥 FASTEST - Easy-Click Buttons (NEW!)**
-After running the script once, you'll find `.command` files in the output folder:
-
-- `output/www/downloads/launch-virtual-console-192.168.1.23.command`
-- `output/www/downloads/launch-virtual-console-192.168.1.45.command`
-- etc.
-
-Just **double-click any .command file** for instant Virtual Console access!
-
-**Dashboard Method**
-Use the HTML dashboard that opens automatically:
-
-- Click "🔗 Access iDRAC" for web interface
-- Click "🖥️ Virtual Console" for JNLP download
-
-**Command Line Method**
-
+**If you need to SSH to Proxmox first:**
 ```bash
-./src/launch-virtual-console.sh 192.168.1.23
+# 1. SSH to your Proxmox host
+ssh root@your-proxmox-host
+
+# 2. Clone the repository
+git clone https://github.com/notdabob/namespace-timeshift-browser-container.git
+cd namespace-timeshift-browser-container
+
+# 3. Deploy the container
+chmod +x deploy-proxmox.sh
+./deploy-proxmox.sh deploy
 ```
 
-### 🔑 Default Credentials
+**If you're already on your Proxmox shell:**
+```bash
+# Clone and deploy in one go
+git clone https://github.com/notdabob/namespace-timeshift-browser-container.git && \
+cd namespace-timeshift-browser-container && \
+chmod +x deploy-proxmox.sh && \
+./deploy-proxmox.sh deploy
+```
 
-All iDRAC servers use these default credentials:
+The deployment script will automatically detect your Proxmox host IP and provide you with a clickable dashboard URL when deployment completes.
 
-- **Username:** `root`
-- **Password:** `calvin`
+That's it! The container will automatically:
+- ✅ Install Docker if needed
+- ✅ Build the iDRAC management container
+- ✅ Start all services (web server, API, network scanner)
+- ✅ Begin discovering iDRAC servers on your network
+- ✅ Provide a web dashboard for management
+
+## Dashboard Features
+
+### 📊 Server Management
+- **Auto-discovery**: Scans network every 5 minutes for iDRAC servers
+- **Status monitoring**: Real-time online/offline status
+- **One-click access**: Direct links to iDRAC web interfaces
+- **Virtual Console**: Instant console access without downloads
+
+### 🔐 SSH Key Management
+- **Generate SSH keys**: RSA 4096-bit with email identification
+- **Deploy to servers**: One-click deployment to all online iDRACs
+- **Passwordless access**: SSH directly using auto-configured aliases
+- **Secure storage**: Keys stored safely within container
+
+### 🌐 Network-Wide Access
+- **Any device**: Access from computers, phones, tablets
+- **Professional UI**: Clean, responsive web interface
+- **Real-time updates**: Dashboard refreshes automatically
+- **Multi-user ready**: Multiple people can access simultaneously
+
+## Default Credentials
+
+**iDRAC Access:**
+- Username: `root`
+- Password: `calvin`
 
 These are the standard Dell iDRAC6 factory defaults.
 
-### First Time JNLP Setup (One Time Only)
+## Container Management
 
-The very first time you use Virtual Console:
+### Status and Monitoring
+```bash
+# Check container status
+./deploy-proxmox.sh status
 
-1. Chrome will ask what to do with the `.jnlp` file
-2. Click "Open with" → "Choose..."
-3. Navigate to your project folder
-4. Select `src/jnlp-interceptor.sh` (created automatically)
-5. Check "Always open with this application"
+# View real-time logs
+./deploy-proxmox.sh logs
 
-After that, all JNLP files will work automatically!
+# Check Docker container directly
+docker ps | grep idrac-manager
+docker logs idrac-manager
+```
 
-### 🔐 SSH Key Management (NEW!)
+### Updates and Maintenance
+```bash
+# Update to latest version from GitHub
+git pull origin main
+./deploy-proxmox.sh update
 
-The dashboard now includes SSH key management for passwordless access:
+# Restart container
+docker restart idrac-manager
 
-**Setup Steps:**
-1. Enter your admin email address in the SSH management section
-2. Click "🔑 Generate SSH Key" - downloads `generate-ssh-key.command`
-3. Double-click the downloaded file to create SSH keys in `~/.ssh/idrac_rsa`
-4. Click "🚀 Deploy to All Servers" - downloads `deploy-ssh-keys.command`
-5. Double-click to deploy keys and update your SSH config
+# Stop container
+docker stop idrac-manager
 
-**After Setup:**
-- SSH directly: `ssh idrac-192-168-1-23` (using configured aliases)
-- Or manually: `ssh -i ~/.ssh/idrac_rsa root@192.168.1.23`
-- No more password prompts!
-
-**What it does:**
-- Creates RSA 4096-bit key pair with your email
-- Updates `~/.ssh/config` with server aliases
-- Copies public key to all online iDRAC servers
-- Backs up existing SSH configuration
-
-### That's Really It
-
-No advanced options needed - the script does everything for you automatically. Just run `./src/launch-idrac.sh` whenever you need to access your iDRAC servers.
+# Remove everything (with confirmation)
+./deploy-proxmox.sh cleanup
+```
 
 ## File Structure
 
 ```
 namespace-timeshift-browser-container/
-├── src/                                    # 🚀 Source scripts
-│   ├── launch-idrac.sh                     # THE MAGIC SCRIPT - run this!
-│   ├── launch-virtual-console.sh           # Direct Virtual Console launcher
-│   ├── launch-timeshift-browser.sh         # Browser-only time shifting
-│   ├── generate_easy_buttons.sh            # Easy button generator (integrated)
-│   └── jnlp-interceptor.sh                 # JNLP handler (auto-generated)
-├── output/                                 # 🎯 Generated files (not in git)
-│   └── www/                                # Web-ready files for hosting
-│       ├── index.html                      # Dashboard webpage (auto-generated)
-│       ├── data/
-│       │   ├── discovered_idracs.json      # Server database (auto-generated)
-│       │   └── admin_config.json           # Admin email & SSH key status
-│       └── downloads/
-│           ├── *.command                   # 🔥 Easy-click buttons (auto-generated)
-│           ├── generate-ssh-key.command    # SSH key generation script
-│           └── deploy-ssh-keys.command     # SSH deployment script
-├── docs/                                  # Documentation  
-├── .gitignore                             # Excludes generated output files
-└── README.md                              # This file
+├── 🐳 Container Components
+│   ├── Dockerfile                         # Multi-service container definition
+│   ├── requirements.txt                   # Python dependencies
+│   ├── deploy-proxmox.sh                  # One-command deployment script
+│   └── docker/
+│       ├── nginx.conf                     # Web server configuration
+│       ├── supervisord.conf               # Service management
+│       └── start.sh                       # Container startup script
+│
+├── 🚀 Application Services
+│   └── src/
+│       ├── idrac-container-api.py         # REST API server
+│       ├── network-scanner.py             # Auto-discovery service
+│       └── dashboard-generator.py         # Web interface generator
+│
+├── 📚 Documentation
+│   ├── README.md                          # This file
+│   ├── PROXMOX-SETUP.md                   # Detailed setup guide
+│   ├── DEPLOYMENT-SUMMARY.md              # Quick reference
+│   └── docs/                              # Additional documentation
+│
+└── 🔧 Development
+    ├── .claude/commands/                   # Claude Code commands
+    ├── CLAUDE.md                          # Development guidance
+    └── .gitignore                         # Version control exclusions
 ```
-
-**Web-Ready Structure!** The `output/www/` folder can be directly hosted by any web server, while source files are organized in `src/`.
 
 ## How It Works
 
-Behind the scenes, the magic script:
+### Container Architecture
+```
+┌─────────────────────────────────────┐
+│ Proxmox Host                        │
+│ ┌─────────────────────────────────┐ │
+│ │ iDRAC Manager Container         │ │
+│ │ ┌─────────────┐ ┌─────────────┐ │ │
+│ │ │ nginx       │ │ Python API  │ │ │
+│ │ │ (Port 80)   │ │ (Port 8765) │ │ │
+│ │ └─────────────┘ └─────────────┘ │ │
+│ │ ┌─────────────┐ ┌─────────────┐ │ │
+│ │ │ Dashboard   │ │ Network     │ │ │
+│ │ │ Generator   │ │ Scanner     │ │ │
+│ │ └─────────────┘ └─────────────┘ │ │
+│ └─────────────────────────────────┘ │
+│           Exposed Ports             │
+│       8080 (Web) | 8765 (API)      │
+└─────────────────────────────────────┘
+```
 
-1. **Auto-installs everything**: Homebrew, coreutils, libfaketime, jq, Chrome, Java agents
-2. **Scans your network**: Finds all iDRAC servers automatically on ports 80/443
-3. **Creates a dashboard**: Beautiful webpage with all your servers and status tracking
-4. **Generates easy buttons**: Creates .command files for instant Virtual Console access
-5. **Time manipulation**: Uses libfaketime to make applications see 2020-01-01 for valid SSL certificates
-6. **Launches Chrome**: With time manipulation active and the dashboard loaded
+### Service Components
+1. **nginx Web Server** - Serves dashboard and handles routing
+2. **Python API Server** - Manages SSH keys, server operations
+3. **Network Scanner** - Discovers iDRAC servers automatically
+4. **Dashboard Generator** - Creates responsive web interface
+5. **Supervisor** - Manages all services within container
 
 ## Troubleshooting
 
-### If something goes wrong
+### Container Won't Start
+```bash
+# Check logs for errors
+docker logs idrac-manager
 
-**Problem: Script won't run**
+# Verify system resources
+docker system df
+df -h
 
-- Make sure you're running `./src/launch-idrac.sh`
-- The script needs to be executable: `chmod +x src/launch-idrac.sh`
+# Restart Docker service
+systemctl restart docker
+```
 
-**Problem: No iDRAC servers found**
+### No Servers Discovered
+```bash
+# Test network scanning manually
+docker exec -it idrac-manager python3 /app/src/network-scanner.py
 
-- The script scans your local network automatically
-- You can manually navigate to your iDRAC IP in the opened Chrome window
+# Check container network connectivity
+docker exec -it idrac-manager ping 192.168.1.1
 
-**Problem: JNLP files don't work**
+# Verify network range in scanner
+docker exec -it idrac-manager cat /app/src/network-scanner.py
+```
 
-- First time: Configure Chrome to use the `src/jnlp-interceptor.sh` script
-- The script creates this file automatically and tells you exactly where it is
+### Dashboard Not Loading
+```bash
+# Check nginx status
+docker exec -it idrac-manager nginx -t
 
-**Problem: Still getting SSL errors**
+# Test API server
+curl http://localhost:8765/status
 
-- Make sure you're using the Chrome window opened by the script
-- Don't use your regular Chrome browser
+# Check all services
+docker exec -it idrac-manager supervisorctl status
+```
 
-That's pretty much it - the script handles everything else automatically!
+### SSH Key Deployment Fails
+```bash
+# Test SSH connectivity to iDRAC
+docker exec -it idrac-manager ssh -o ConnectTimeout=10 root@idrac-ip
+
+# Check iDRAC SSH settings (Enable SSH in iDRAC web interface)
+# Navigate: iDRAC Settings → Network → Services → SSH
+```
+
+## Comparison: Container vs macOS Solution
+
+| Feature | macOS Time-Shift | Container Solution |
+|---------|------------------|-------------------|
+| **Deployment** | Complex setup | One command |
+| **Access** | Single Mac only | Network-wide |
+| **Quarantine Issues** | ❌ Constant problems | ✅ None |
+| **Time Manipulation** | ❌ Required | ✅ Not needed |
+| **Professional Use** | ❌ Dev tool | ✅ Enterprise ready |
+| **Multi-user** | ❌ Single user | ✅ Concurrent access |
+| **Maintenance** | ❌ Manual updates | ✅ Container updates |
+
+## Advanced Configuration
+
+### Custom Network Scanning
+```bash
+# Edit scanner for custom IP ranges
+docker exec -it idrac-manager vi /app/src/network-scanner.py
+docker restart idrac-manager
+```
+
+### Custom Ports
+Edit `deploy-proxmox.sh` before deployment:
+```bash
+HTTP_PORT="8080"    # Web dashboard port
+API_PORT="8765"     # API server port
+```
+
+### Backup and Restore
+```bash
+# Backup container data
+docker run --rm -v idrac-data:/data -v $(pwd):/backup ubuntu tar czf /backup/idrac-backup.tar.gz -C /data .
+
+# Restore container data
+docker run --rm -v idrac-data:/data -v $(pwd):/backup ubuntu tar xzf /backup/idrac-backup.tar.gz -C /data
+```
 
 ## Security Considerations
 
-- Time manipulation is contained within isolated namespaces
-- Does not affect host system time permanently
-- Temporary Chrome profiles are cleaned up automatically
-- Designed for legitimate network administration tasks
+- **Network Access**: Container uses host networking for iDRAC discovery
+- **SSH Keys**: Securely stored within container filesystem
+- **API Security**: API server only accessible from Proxmox host
+- **Default Credentials**: Change default iDRAC passwords after setup
+- **Data Persistence**: All data stored in Docker volumes
 
 ## Development Workflow
 
 ### Smart Commit Command
 
-This project includes a custom Claude Code command for streamlined version management:
+This project includes a custom Claude Code command for version management:
 
 ```bash
-/project:commit
+/project:commit                    # Auto-detect changes and commit
+/project:commit minor             # Force minor version bump
+/project:commit -m "Fix" patch    # Custom message with patch version
 ```
 
-The smart commit command automatically:
-- Detects commit type (patch/minor/major) from file changes
-- Increments version numbers appropriately
-- Updates CHANGELOG.md with new version entry
-- Creates properly formatted git commits with Claude Code attribution
+The command automatically:
+- Analyzes file changes for appropriate version increment
+- Updates CHANGELOG.md with version entries
+- Creates properly formatted git commits
+- Includes Claude Code attribution
 
-Usage examples:
-- Auto-commit: `/project:commit`
-- Force version type: `/project:commit minor`
-- Custom message: `/project:commit -m "Fix SSL issue" patch`
-- Preview changes: `/project:commit --dry-run`
+## GitHub Repository
+
+**Source Code**: https://github.com/notdabob/namespace-timeshift-browser-container
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and test thoroughly
+4. Commit with descriptive messages: `git commit -m "Add feature description"`
+5. Push to your fork: `git push origin feature-name`
+6. Create a Pull Request
+
+### Issues and Support
+
+- **Bug Reports**: [Create an issue](https://github.com/notdabob/namespace-timeshift-browser-container/issues) on GitHub
+- **Feature Requests**: [Open a feature request](https://github.com/notdabob/namespace-timeshift-browser-container/issues) with detailed requirements
+- **Questions**: Check existing [discussions](https://github.com/notdabob/namespace-timeshift-browser-container/discussions) or start a new one
+
+### Troubleshooting
+
+For deployment issues:
+
+1. **Check container logs**: `docker logs idrac-manager`
+2. **Verify network connectivity**: Test access to iDRAC servers
+3. **Review system resources**: Ensure adequate CPU/memory
+4. **Check service status**: `docker exec -it idrac-manager supervisorctl status`
+5. **Update to latest**: `git pull && ./deploy-proxmox.sh update`
 
 ## License
 
-This tool is designed for legitimate network administration tasks to access legacy Dell iDRAC6 hardware that cannot be updated.
+This tool is designed for legitimate network administration tasks to access Dell iDRAC hardware in enterprise environments.

@@ -1,0 +1,22 @@
+# Ignore unnecessary files for Docker builds
+.git
+.gitignore
+*.md
+README.md
+CHANGELOG.md
+output/
+input/
+.DS_Store
+*.log
+*.tmp
+
+# Ignore macOS specific files
+src/launch-idrac.sh
+src/launch-virtual-console.sh
+src/launch-timeshift-browser.sh
+src/run_unblock_and_execute.sh
+
+# Keep only container-specific files
+!src/idrac-container-api.py
+!src/network-scanner.py
+!src/dashboard-generator.py
