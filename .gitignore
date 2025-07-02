@@ -1,6 +1,10 @@
 # Generated output files (contain network topology and security information)
 /output/
 
+# Input files for debugging and testing (temporary)
+/input/
+/docs/error-screenshots/
+
 # macOS system files
 .DS_Store
 

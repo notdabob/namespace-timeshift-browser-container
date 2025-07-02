@@ -5,39 +5,49 @@ graph TD
     A[namespace-timeshift-browser-container/] --> B[src/]
     A --> C[output/]
     A --> D[docs/]
-    A --> E[README.md]
-    A --> F[.gitignore]
-    A --> G[CLAUDE.md]
+    A --> E[input/]
+    A --> F[README.md]
+    A --> G[.gitignore]
+    A --> H[CLAUDE.md]
+    A --> I[VERSION]
 
-    B --> H[launch-idrac.sh]
-    B --> I[launch-virtual-console.sh]
-    B --> J[launch-timeshift-browser.sh]
-    B --> K[generate_easy_buttons.sh]
-    B --> L[jnlp-interceptor.sh]
+    B --> J[launch-idrac.sh]
+    B --> K[launch-virtual-console.sh]
+    B --> L[launch-timeshift-browser.sh]
+    B --> M[generate_easy_buttons.sh]
+    B --> N[jnlp-interceptor.sh]
 
-    C --> M[www/]
-    M --> N[index.html]
-    M --> O[data/]
-    M --> P[downloads/]
-    M --> Q[assets/]
+    C --> O[www/]
+    C --> P[tmp/]
+    C --> Q[logs/]
+    O --> R[index.html]
+    O --> S[data/]
+    O --> T[downloads/]
+    O --> U[assets/]
 
-    O --> R[discovered_idracs.json]
-    P --> S[*.command files]
+    S --> V[discovered_idracs.json]
+    T --> W[*.command files]
 
-    D --> T[ProjectOverView.md]
-    D --> U[file-structure.md]
-    D --> V[error-screenshots/]
+    D --> X[ProjectOverView.md]
+    D --> Y[file-structure.md]
+
+    E --> Z[diagnostics/]
+    Z --> AA[screenshots/]
+    AA --> BB[error/]
+    AA --> CC[success/]
+    AA --> DD[inspiration/]
 
     style A fill:#e1f5fe
     style B fill:#f3e5f5
     style C fill:#fff3e0
-    style M fill:#e8f5e8
     style D fill:#f0f8ff
-    style H fill:#ffebcd
-    style I fill:#ffebcd
+    style E fill:#ffe0e6
+    style O fill:#e8f5e8
     style J fill:#ffebcd
     style K fill:#ffebcd
     style L fill:#ffebcd
+    style M fill:#ffebcd
+    style N fill:#ffebcd
 ```
 
 ## File Descriptions
@@ -66,13 +76,23 @@ graph TD
 
 - **ProjectOverView.md**: Project requirements and technical specifications
 - **file-structure.md**: This file - visual project structure diagram with web-ready organization
-- **error-screenshots/**: Screenshots of SSL certificate errors and troubleshooting examples
+
+### Input Directory (`input/`)
+**User-provided materials for debugging and development - excluded from source control**
+
+#### Diagnostics (`input/diagnostics/`)
+**Organized debugging materials for development assistance**
+
+- **screenshots/error/**: Error screenshots for troubleshooting SSL certificates, browser issues, etc.
+- **screenshots/success/**: Success state screenshots showing working configurations
+- **screenshots/inspiration/**: Visual references and design ideas for UI/UX improvements
 
 ### Root Directory
 
 - **README.md**: Installation instructions, usage workflow, and troubleshooting guide
 - **CLAUDE.md**: Development guidance for Claude Code instances
-- **.gitignore**: Excludes generated output files containing network topology and security information
+- **VERSION**: Semantic version tracking for releases
+- **.gitignore**: Excludes generated output files and temporary input materials
 
 ## Web Hosting Ready Structure
 

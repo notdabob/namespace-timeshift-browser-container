@@ -133,13 +133,18 @@ The system auto-generates several files in the `output/` directory during operat
 - `output/www/downloads/launch-virtual-console-*.command`: Easy-click access files
 
 ### File Organization
+**IMPORTANT**: For complete file structure details, always reference `docs/file-structure.md` as the authoritative source of project organization.
+
 - **Source files** (`src/`): Scripts and development files
-- **Generated output** (`output/www/`): Web-ready files for hosting
+- **Generated output** (`output/www/`): Web-ready files for hosting  
+- **Input materials** (`input/diagnostics/`): User-provided debugging materials (screenshots, etc.)
 - **Documentation** (`docs/`): Project documentation and diagrams
-- **Security**: All generated files are excluded from git via `.gitignore`
+- **Security**: All generated files and input materials are excluded from git via `.gitignore`
 
 ### Debugging Time Issues
+
 If SSL certificates still appear invalid:
+
 1. Verify `libfaketime` is properly loaded in the environment
 2. Check that `FAKETIME` environment variable is set to "2020-01-01 12:00:00"
 3. Ensure Chrome is launched from the time-shifted script, not directly
