@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.0] - 2025-07-02
+
+### Added in v2.5.0
+
+- Complete containerization with Docker support for Proxmox deployment
+- Python-based API server for iDRAC management operations
+- Dynamic HTML dashboard generator with real-time updates
+- Network scanner module for automatic iDRAC discovery
+- Proxmox deployment script with automated setup
+- Container health checks and supervisor process management
+- nginx web server configuration for static content serving
+
+### Enhanced in v2.5.0
+
+- Deployment script with improved IP detection and URL display
+- User-friendly deployment output with clickable URLs
+- Professional ASCII art deployment success messages
+- Container management commands in deployment output
+- Support for both HTTP dashboard (port 8080) and API (port 8765)
+
+### Technical in v2.5.0
+
+- Migrated from bash scripts to Python-based microservices architecture
+- Implemented RESTful API endpoints for all iDRAC operations
+- Docker multi-stage build for optimized container size
+- Supervisor configuration for process management
+- Persistent data volume support for configuration storage
+
+### Removed in v2.5.0
+
+- Legacy bash scripts (replaced by Python implementations):
+  - src/jnlp-interceptor.sh
+  - src/launch-idrac.sh
+  - src/launch-timeshift-browser.sh
+  - src/launch-virtual-console.sh
+
 ## [2.4.0] - 2025-07-02
 
 ### Changed in v2.4.0
@@ -73,5 +109,8 @@ All notable changes to this project will be documented in this file.
 
 ## Version History
 
+- **2.5.0** (2025-07-02): Containerization and Python-based architecture for Proxmox deployment
+- **2.4.0** (2025-07-02): Simplified version management using CHANGELOG.md
+- **2.3.0** (2025-07-02): Smart commit command system
 - **2.2.0** (2025-07-02): SSH key management and passwordless access
 - **2.1.0** (2025-07-02): Initial comprehensive release
