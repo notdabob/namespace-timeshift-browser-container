@@ -8,8 +8,9 @@ set -e
 # Configuration
 CONTAINER_NAME="idrac-manager"
 CONTAINER_IMAGE="idrac-manager:latest"
-HTTP_PORT="8080"
-API_PORT="8765"
+# Note: Using host networking mode, so these ports are not remapped
+HTTP_PORT="80"     # Dashboard port (nginx)
+API_PORT="8765"    # API server port
 DATA_VOLUME="idrac-data"
 
 # Colors for output
@@ -126,12 +127,11 @@ deploy_container() {
     # Get the host IP for display purposes
     HOST_IP=$(hostname -I | awk '{print $1}')
     
-    # Run the container
+    # Run the container with host networking for proper network access
     docker run -d \
         --name "$CONTAINER_NAME" \
         --restart unless-stopped \
-        -p "$HTTP_PORT:80" \
-        -p "$API_PORT:8765" \
+        --network host \
         -v "$DATA_VOLUME:/app/data" \
         --cap-add=NET_ADMIN \
         --cap-add=NET_RAW \
@@ -152,7 +152,7 @@ deploy_container() {
         echo "║                                                                                  ║"
         echo "║  🌐 CLICK TO ACCESS YOUR DASHBOARD:                                              ║"
         echo "║                                                                                  ║"
-        echo -e "║     ${GREEN}${BLUE}http://$HOST_IP:$HTTP_PORT${NC}                                                      ║"
+        echo -e "║     ${GREEN}${BLUE}http://$HOST_IP${NC} (or http://$HOST_IP:80)                                        ║"
         echo "║                                                                                  ║"
         echo "║  📋 Copy and paste this URL into any web browser on your network                ║"
         echo "║  📱 Works on computers, phones, tablets - anywhere!                             ║"
@@ -177,7 +177,7 @@ deploy_container() {
         echo "║                                                                                  ║"
         echo "╚══════════════════════════════════════════════════════════════════════════════════╝"
         echo ""
-        echo -e "${GREEN}${BLUE}🎯 QUICK START: Open your browser and go to http://$HOST_IP:$HTTP_PORT${NC}"
+        echo -e "${GREEN}${BLUE}🎯 QUICK START: Open your browser and go to http://$HOST_IP${NC}"
         echo -e "${YELLOW}💡 TIP: Bookmark this URL for easy access from any device!${NC}"
     else
         print_error "Container failed to start. Check logs with: docker logs $CONTAINER_NAME"

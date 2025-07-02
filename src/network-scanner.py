@@ -25,24 +25,29 @@ def log_message(message):
     print(f"[SCANNER] [{timestamp}] {message}")
 
 def get_network_range():
-    """Get the container's network range for scanning"""
+    """Get the host's network range for scanning"""
     try:
-        # Get default gateway
-        result = subprocess.run(['ip', 'route', 'show', 'default'], 
+        # Get all network interfaces
+        result = subprocess.run(['ip', 'addr', 'show'], 
                               capture_output=True, text=True)
         if result.returncode == 0:
-            # Parse gateway IP
-            parts = result.stdout.split()
-            gateway = parts[2] if len(parts) > 2 else None
-            
-            if gateway:
-                # Convert to network range (assume /24)
-                network_base = '.'.join(gateway.split('.')[:-1])
-                return f"{network_base}."
+            # Look for the main ethernet interface (not docker0 or lo)
+            for line in result.stdout.split('\n'):
+                if 'inet ' in line and '127.0.0.1' not in line and 'docker0' not in line:
+                    # Extract IP address
+                    ip_info = line.strip().split()[1]
+                    ip_addr = ip_info.split('/')[0]
+                    
+                    # Skip docker bridge networks
+                    if not ip_addr.startswith('172.'):
+                        network_base = '.'.join(ip_addr.split('.')[:-1])
+                        log_message(f"Detected network range: {network_base}.0/24")
+                        return f"{network_base}."
     except Exception as e:
         log_message(f"Failed to detect network: {e}")
     
     # Fallback to common ranges
+    log_message("Using fallback network range: 192.168.1.0/24")
     return "192.168.1."
 
 def scan_port(ip, port):
