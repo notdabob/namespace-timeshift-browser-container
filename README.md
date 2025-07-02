@@ -18,10 +18,10 @@ This solution uses time manipulation to allow connections to legacy Dell iDRAC6 
 
 ### Usage
 
-1. **Double-click the script**
+1. **Run the main script**
 
    ```bash
-   ./launch-idrac.sh
+   ./src/launch-idrac.sh
    ```
 
 That's literally it! 🎉
@@ -41,10 +41,10 @@ The script automatically:
 ### Three Ways to Access iDRAC
 
 **🔥 FASTEST - Easy-Click Buttons (NEW!)**
-After running the script once, you'll find `.command` files in your project folder:
+After running the script once, you'll find `.command` files in the output folder:
 
-- `launch-virtual-console-192.168.1.23.command`
-- `launch-virtual-console-192.168.1.45.command`
+- `output/www/downloads/launch-virtual-console-192.168.1.23.command`
+- `output/www/downloads/launch-virtual-console-192.168.1.45.command`
 - etc.
 
 Just **double-click any .command file** for instant Virtual Console access!
@@ -58,7 +58,7 @@ Use the HTML dashboard that opens automatically:
 **Command Line Method**
 
 ```bash
-./launch-virtual-console.sh 192.168.1.23
+./src/launch-virtual-console.sh 192.168.1.23
 ```
 
 ### 🔑 Default Credentials
@@ -77,32 +77,38 @@ The very first time you use Virtual Console:
 1. Chrome will ask what to do with the `.jnlp` file
 2. Click "Open with" → "Choose..."
 3. Navigate to your project folder
-4. Select `jnlp-interceptor.sh` (created automatically)
+4. Select `src/jnlp-interceptor.sh` (created automatically)
 5. Check "Always open with this application"
 
 After that, all JNLP files will work automatically!
 
 ### That's Really It
 
-No advanced options needed - the script does everything for you automatically. Just double-click `launch-idrac.sh` whenever you need to access your iDRAC servers.
+No advanced options needed - the script does everything for you automatically. Just run `./src/launch-idrac.sh` whenever you need to access your iDRAC servers.
 
 ## File Structure
 
 ```
-time-shift-idrac/
-├── launch-idrac.sh                        # 🚀 THE MAGIC SCRIPT - just double-click this!
-├── discovered_idracs.json                 # Server database (auto-generated)
-├── idrac-dashboard.html                   # Dashboard webpage (auto-generated)
-├── jnlp-interceptor.sh                    # JNLP handler (auto-generated)
-├── launch-virtual-console-*.command       # 🔥 Easy-click buttons (auto-generated)
-├── launch-virtual-console.sh              # Direct Virtual Console launcher
-├── generate_easy_buttons.sh               # Easy button generator (integrated)
-├── docs/                                 # Documentation  
-├── viewer.jnlp                           # Example iDRAC6 JNLP file
-└── README.md                             # This file
+namespace-timeshift-browser-container/
+├── src/                                    # 🚀 Source scripts
+│   ├── launch-idrac.sh                     # THE MAGIC SCRIPT - run this!
+│   ├── launch-virtual-console.sh           # Direct Virtual Console launcher
+│   ├── launch-timeshift-browser.sh         # Browser-only time shifting
+│   ├── generate_easy_buttons.sh            # Easy button generator (integrated)
+│   └── jnlp-interceptor.sh                 # JNLP handler (auto-generated)
+├── output/                                 # 🎯 Generated files (not in git)
+│   └── www/                                # Web-ready files for hosting
+│       ├── index.html                      # Dashboard webpage (auto-generated)
+│       ├── data/
+│       │   └── discovered_idracs.json      # Server database (auto-generated)
+│       └── downloads/
+│           └── *.command                   # 🔥 Easy-click buttons (auto-generated)
+├── docs/                                  # Documentation  
+├── .gitignore                             # Excludes generated output files
+└── README.md                              # This file
 ```
 
-**Clean & Simple!** Everything you need is in one script - no more scattered files or complex folder structures.
+**Web-Ready Structure!** The `output/www/` folder can be directly hosted by any web server, while source files are organized in `src/`.
 
 ## How It Works
 
@@ -121,8 +127,8 @@ Behind the scenes, the magic script:
 
 **Problem: Script won't run**
 
-- Make sure you're running `./launch-idrac.sh`
-- The script needs to be executable: `chmod +x launch-idrac.sh`
+- Make sure you're running `./src/launch-idrac.sh`
+- The script needs to be executable: `chmod +x src/launch-idrac.sh`
 
 **Problem: No iDRAC servers found**
 
@@ -131,7 +137,7 @@ Behind the scenes, the magic script:
 
 **Problem: JNLP files don't work**
 
-- First time: Configure Chrome to use the `jnlp-interceptor.sh` script
+- First time: Configure Chrome to use the `src/jnlp-interceptor.sh` script
 - The script creates this file automatically and tells you exactly where it is
 
 **Problem: Still getting SSL errors**

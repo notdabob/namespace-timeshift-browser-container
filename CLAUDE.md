@@ -67,20 +67,47 @@ The main script (`launch-idrac.sh`) provides a complete automated workflow:
 
 ### Running the Main Script
 ```bash
-./launch-idrac.sh
+./src/launch-idrac.sh
 ```
-The primary entry point that handles everything automatically.
+The primary entry point that handles everything automatically. Now located in `src/` directory.
 
 ### Manual Component Scripts
 ```bash
-./launch-virtual-console.sh <IP_ADDRESS>        # Direct Virtual Console access
-./launch-timeshift-browser.sh                   # Browser-only time shifting
-./generate_easy_buttons.sh                      # Generate .command files
+./src/launch-virtual-console.sh <IP_ADDRESS>    # Direct Virtual Console access
+./src/launch-timeshift-browser.sh               # Browser-only time shifting
+./src/generate_easy_buttons.sh                  # Generate .command files
 ```
 
 ### Making Scripts Executable
 ```bash
-chmod +x *.sh
+chmod +x src/*.sh
+```
+
+### Testing and Validation
+```bash
+# Test specific iDRAC connection
+./src/launch-virtual-console.sh 192.168.1.23
+
+# Verify libfaketime installation
+ls -la /opt/homebrew/Cellar/libfaketime/*/lib/faketime/libfaketime.1.dylib
+
+# Check generated files structure
+ls -la output/www/downloads/*.command           # Easy-click buttons
+cat output/www/data/discovered_idracs.json | jq '.'  # Server database
+
+# Test web dashboard locally
+open output/www/index.html                      # Open dashboard in browser
+```
+
+### Web Development and Testing
+```bash
+# Start local web server for testing (optional)
+cd output/www && python3 -m http.server 8080
+
+# View generated web files
+ls -la output/www/                              # Web root contents
+ls -la output/www/data/                         # JSON data files
+ls -la output/www/downloads/                    # Downloadable .command files
 ```
 
 ## Development Notes
@@ -99,11 +126,17 @@ The main script scans ports 80/443 on the local network. For testing specific IP
 ```
 
 ### Generated Files
-The system auto-generates several files during operation:
-- `discovered_idracs.json`: Server database with timestamps
-- `idrac-dashboard.html`: Web interface
-- `jnlp-interceptor.sh`: JNLP file handler
-- `launch-virtual-console-*.command`: Easy-click access files
+The system auto-generates several files in the `output/` directory during operation:
+- `output/www/data/discovered_idracs.json`: Server database with timestamps
+- `output/www/index.html`: Web interface dashboard
+- `src/jnlp-interceptor.sh`: JNLP file handler (in source directory)
+- `output/www/downloads/launch-virtual-console-*.command`: Easy-click access files
+
+### File Organization
+- **Source files** (`src/`): Scripts and development files
+- **Generated output** (`output/www/`): Web-ready files for hosting
+- **Documentation** (`docs/`): Project documentation and diagrams
+- **Security**: All generated files are excluded from git via `.gitignore`
 
 ### Debugging Time Issues
 If SSL certificates still appear invalid:

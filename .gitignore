@@ -1,0 +1,9 @@
+# Generated output files (contain network topology and security information)
+/output/
+
+# macOS system files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log

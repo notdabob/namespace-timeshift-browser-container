@@ -6,8 +6,15 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-HTML_FILE="${SCRIPT_DIR}/idrac-dashboard.html"
-DISCOVERED_FILE="${SCRIPT_DIR}/discovered_idracs.json"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+OUTPUT_DIR="${PROJECT_DIR}/output"
+WWW_DIR="${OUTPUT_DIR}/www"
+DOWNLOADS_DIR="${WWW_DIR}/downloads"
+TMP_DIR="${OUTPUT_DIR}/tmp"
+LOGS_DIR="${OUTPUT_DIR}/logs"
+
+HTML_FILE="${WWW_DIR}/index.html"
+DISCOVERED_FILE="${WWW_DIR}/data/discovered_idracs.json"
 TARGET_DATE="2020-01-01 12:00:00"
 
 # Default iDRAC credentials
@@ -103,7 +110,7 @@ install_dependencies() {
         if [ ! -d "/Applications/Google Chrome.app" ]; then
             # Fallback to direct download
             print_status "Downloading Chrome directly..."
-            CHROME_DMG="/tmp/Chrome.dmg"
+            CHROME_DMG="${TMP_DIR}/Chrome.dmg"
             curl -L "https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg" -o "$CHROME_DMG"
             
             hdiutil attach "$CHROME_DMG" -quiet
@@ -119,6 +126,10 @@ install_dependencies() {
     JAVA_AGENT_PATH="$JAVA_AGENT_DIR/java-faketime-agent.jar"
     
     mkdir -p "$JAVA_AGENT_DIR"
+    mkdir -p "$WWW_DIR/data"
+    mkdir -p "$DOWNLOADS_DIR"
+    mkdir -p "$TMP_DIR"
+    mkdir -p "$LOGS_DIR"
     
     if [ ! -f "$JAVA_AGENT_PATH" ]; then
         JAVA_AGENT_URL="https://github.com/arvindsv/faketime-java-agent/releases/download/v1.0/faketime-java-agent-1.0.jar"
@@ -263,7 +274,7 @@ scan_network() {
     fi
     
     # Create temporary file for this scan's results
-    local temp_results=$(mktemp)
+    local temp_results="${TMP_DIR}/scan_results_$(date +%s).tmp"
     
     # Scan common iDRAC ports in parallel
     local pids=()
@@ -352,12 +363,12 @@ generate_easy_buttons() {
             if [ -n "$url" ]; then
                 # Extract IP from URL
                 local ip=$(echo "$url" | sed -E 's|https?://([^/]+).*|\1|')
-                local button_file="${SCRIPT_DIR}/${EASY_BUTTON_PREFIX}-${ip}.command"
+                local button_file="${DOWNLOADS_DIR}/${EASY_BUTTON_PREFIX}-${ip}.command"
                 
                 cat > "$button_file" <<EOF
 #!/bin/bash
-cd "\$(dirname "\$0")"
-./launch-virtual-console.sh $ip
+cd "\$(dirname "\$0")/../.."
+./src/launch-virtual-console.sh $ip
 EOF
                 chmod +x "$button_file"
                 print_success "Created easy button: $(basename "$button_file")"
