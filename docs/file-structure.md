@@ -15,19 +15,19 @@ graph TD
     A --> J[PROXMOX-SETUP.md]
     A --> K[DEPLOYMENT-SUMMARY.md]
     A --> L[CLAUDE.md]
-    
+
     B --> B1[commands/]
     B1 --> B2[commit.md]
     B --> B3[claude_command_setup.sh]
-    
+
     C --> C1[nginx.conf]
     C --> C2[supervisord.conf]
     C --> C3[start.sh]
-    
+
     D --> D1[CHANGELOG.md]
     D --> D2[file-structure.md]
     D --> D3[ProjectOverView.md]
-    
+
     E --> E1[idrac-container-api.py]
     E --> E2[network-scanner.py]
     E --> E3[dashboard-generator.py]
@@ -37,7 +37,7 @@ graph TD
 
 ## Directory Structure
 
-```
+```text
 namespace-timeshift-browser-container/
 ├── .claude/                      # Claude Code project commands
 │   ├── commands/                 # Custom command definitions
@@ -107,7 +107,7 @@ namespace-timeshift-browser-container/
 
 When the container is running, it creates additional directories:
 
-```
+```text
 /app/                            # Container application root
 ├── www/                         # Web server document root
 │   ├── index.html              # Generated dashboard
