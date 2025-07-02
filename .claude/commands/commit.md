@@ -2,18 +2,16 @@
 
 Execute the smart commit script that automatically handles version bumps and changelog updates.
 
-This command runs the `src/claude-commit.sh` script which:
+This command provides smart commit functionality with automatic version management:
 
 - Auto-detects commit type (patch/minor/major) from file changes
-- Increments version numbers appropriately
-- Updates CHANGELOG.md with new version entry
+- Updates CHANGELOG.md with new version entry and proper formatting
 - Creates properly formatted git commits with Claude Code attribution
-- Supports custom commit messages and dry-run mode
+- Uses CHANGELOG.md as the single source of truth for version tracking
 
-Usage examples:
-- Auto-commit with detected changes: `./src/claude-commit.sh`
-- Force version bump type: `./src/claude-commit.sh minor`
-- Custom message with patch: `./src/claude-commit.sh -m "Fix SSL issue" patch`
-- Preview changes: `./src/claude-commit.sh --dry-run`
+Version increment logic:
+- **patch**: Bug fixes, documentation updates, small improvements
+- **minor**: New features, script additions, significant enhancements  
+- **major**: Breaking changes, major architectural updates
 
 The script intelligently determines whether changes warrant patch (bug fixes), minor (new features), or major (breaking changes) version increments based on the files modified.

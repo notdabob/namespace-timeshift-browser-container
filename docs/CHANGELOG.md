@@ -2,13 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.0] - 2025-07-02
+
+### Changed
+- Remove deprecated VERSION file - use CHANGELOG.md as single source of truth for versions
+- Update smart commit command documentation to reflect CHANGELOG-only versioning
+- Simplify version management workflow
+
+### Removed  
+- `docs/VERSION` file (deprecated in favor of CHANGELOG.md versioning)
+
 ## [2.3.0] - 2025-07-02
 
 ### Added
 - Smart commit command system via `.claude/commands/commit.md`
 - Claude Code project command `/project:commit` for version management
 - Automated version increment detection (patch/minor/major)
-- VERSION file tracking in `docs/VERSION`
 
 ### Enhanced
 - Documentation updated with smart commit workflow instructions
