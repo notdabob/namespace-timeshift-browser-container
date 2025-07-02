@@ -835,67 +835,31 @@ EOF
         }
 
         function launchTimeShiftedBrowser(url) {
-            // Show instructions for manual launch
-            const instructions = `To access ${url} with time-shifted SSL certificates:
-
-1. Open Terminal
-2. Navigate to this project directory
-3. Run this command:
-
-   ./launch-timeshift-browser.sh "${url}"
-
-This will launch Chrome with SSL certificates valid for 2020.
-Click OK and follow the steps above.`;
-            
-            alert(instructions);
-            
-            // Also copy the command to clipboard if possible
-            try {
-                const command = `./launch-timeshift-browser.sh "${url}"`;
-                navigator.clipboard.writeText(command).then(() => {
-                    console.log('Command copied to clipboard:', command);
-                }).catch(() => {
-                    console.log('Could not copy to clipboard');
-                });
-            } catch (e) {
-                console.log('Clipboard not available');
-            }
+            // Since we're already in a time-shifted Chrome environment, just open the URL directly
+            window.open(url, '_blank');
         }
 
         function launchVirtualConsole(url) {
             // Extract IP from URL
             const ip = url.replace(/https?:\/\//, '').replace(/\/.*$/, '');
             
-            // Show instructions for Virtual Console launch
-            const instructions = `🖥️ ONE-CLICK VIRTUAL CONSOLE for ${ip}
-
-1. Open Terminal
-2. Navigate to this project directory  
-3. Run this command:
-
-   ./launch-virtual-console.sh ${ip}
-
-This will automatically:
-✅ Download the JNLP file
-✅ Handle time-shifted SSL certificates
-✅ Launch the Virtual Console directly
-✅ Bypass macOS JNLP security restrictions
-
-Click OK and run the command above for instant Virtual Console access!`;
+            // Create download link for the .command file
+            const commandFileName = `launch-virtual-console-${ip}.command`;
+            const downloadUrl = `downloads/${commandFileName}`;
             
-            alert(instructions);
+            // Create temporary download link and trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = commandFileName;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             
-            // Copy the command to clipboard
-            try {
-                const command = `./launch-virtual-console.sh ${ip}`;
-                navigator.clipboard.writeText(command).then(() => {
-                    console.log('Virtual Console command copied to clipboard:', command);
-                }).catch(() => {
-                    console.log('Could not copy to clipboard');
-                });
-            } catch (e) {
-                console.log('Clipboard not available');
-            }
+            // Show brief instructions
+            setTimeout(() => {
+                alert(`📥 Downloaded: ${commandFileName}\n\n✅ Double-click the downloaded file to launch Virtual Console for ${ip}\n\n🔧 The .command file handles all time-shifting automatically!`);
+            }, 100);
         }
 
         function renderServers() {
@@ -1127,8 +1091,16 @@ launch_chrome() {
     # Set Java environment for JNLP handling
     export JAVA_TOOL_OPTIONS="-javaagent:$JAVA_FAKETIME_AGENT"
     
-    # Launch Chrome using faketime with the dashboard
-    "$FAKETIME_BIN" "$TARGET_DATE" open -a "Google Chrome" "file://$HTML_FILE_ABS"
+    # Launch Chrome using faketime with the dashboard in an isolated new process
+    # Use --new-instance to force a new Chrome process isolated from any existing browser sessions
+    "$FAKETIME_BIN" "$TARGET_DATE" "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+        --new-instance \
+        --user-data-dir="${TMP_DIR}/chrome-profile-$(date +%s)" \
+        --disable-web-security \
+        --disable-features=VizDisplayCompositor \
+        --no-first-run \
+        --no-default-browser-check \
+        "file://$HTML_FILE_ABS"
     
     echo "Chrome launched with time-shifted environment"
     echo "Time manipulation will apply to any iDRAC sites accessed from this Chrome instance"
