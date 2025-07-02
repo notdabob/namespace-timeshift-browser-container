@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.1] - 2025-07-02
+
+### Improved in v2.6.1 at 2025-07-02 14:47:21 EDT
+
+- Replaced mermaid diagram with clean, readable ASCII tree structure in file-structure.md
+- Enhanced shell alias script with better path handling and organization
+- Fixed markdown linting issues in documentation files
+
+### Documentation in v2.6.1 at 2025-07-02 14:47:21 EDT
+
+- Added emojis for visual categorization in file-structure.md
+- Expanded file purpose descriptions with detailed functionality
+- Added container runtime structure visualization
+- Improved data persistence documentation
+
 ## [2.6.0] - 2025-07-02
 
 ### Enhanced in v2.6.0 at 2025-07-02 14:22:33 EDT
@@ -16,6 +31,8 @@ All notable changes to this project will be documented in this file.
 
 - Commit command to use timestamp-based section headers for changelog
 - Documentation to emphasize file-structure.md as authoritative source
+- Replaced unwieldy mermaid diagram with clean ASCII tree structure in file-structure.md
+- Added Quick Overview section for better navigation of project structure
 
 ## [2.5.0] - 2025-07-02
 
@@ -124,6 +141,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version History
 
+- **2.6.1** (2025-07-02): Improved file structure documentation and shell alias enhancements
 - **2.6.0** (2025-07-02): Documentation enhancements and formatting improvements
 - **2.5.0** (2025-07-02): Containerization and Python-based architecture for Proxmox deployment
 - **2.4.0** (2025-07-02): Simplified version management using CHANGELOG.md

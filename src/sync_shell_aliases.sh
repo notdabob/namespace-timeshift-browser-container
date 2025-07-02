@@ -11,36 +11,44 @@ touch "$ZSHRC"
 mkdir -p "$(dirname "$POWERSHELL_PROFILE")"
 touch "$POWERSHELL_PROFILE"
 
-# Common PATH and alias lines
+# Common PATH lines
 PATH_LINES=(
 'export PATH="$HOME/bin:$PATH"'
-'export PATH="$PATH:~/.local/bin"'
+'export PATH="$PATH:$HOME/.local/bin"'
 'export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"'
 )
-ALIAS_LINES=(
+
+# Bash aliases
+BASH_ALIASES=(
 'alias ls="ls --color=auto"'
-'alias activate_whisper='\''source ~/activate_whisper.sh'\'''
-'alias pip=pip3'
+'alias activate_whisper='\''source "$HOME/activate_whisper.sh"'\'''
+'alias pip="pip3"'
 'alias code="code-insiders"'
 'alias claude="$HOME/.claude/local/claude"'
-'alias cc="./src/claude-commit.sh"'
-'alias ccommit="./src/claude-commit.sh"'
+)
+
+# Zsh aliases (ls -G is preferred for zsh)
+ZSH_ALIASES=(
+'alias ls="ls -G"'
+'alias activate_whisper='\''source "$HOME/activate_whisper.sh"'\'''
+'alias pip="pip3"'
+'alias code="code-insiders"'
+'alias claude="$HOME/.claude/local/claude"'
 )
 
 # For .bashrc
 for line in "${PATH_LINES[@]}"; do
   grep -qxF "$line" "$BASHRC" || echo "$line" >> "$BASHRC"
 done
-for line in "${ALIAS_LINES[@]}"; do
+for line in "${BASH_ALIASES[@]}"; do
   grep -qxF "$line" "$BASHRC" || echo "$line" >> "$BASHRC"
 done
 
-# For .zshrc (with ls alias as ls -G for zsh)
+# For .zshrc
 for line in "${PATH_LINES[@]}"; do
   grep -qxF "$line" "$ZSHRC" || echo "$line" >> "$ZSHRC"
 done
-grep -qxF 'alias ls="ls -G"' "$ZSHRC" || echo 'alias ls="ls -G"' >> "$ZSHRC"
-for line in "${ALIAS_LINES[@]:1}"; do
+for line in "${ZSH_ALIASES[@]}"; do
   grep -qxF "$line" "$ZSHRC" || echo "$line" >> "$ZSHRC"
 done
 
@@ -54,8 +62,6 @@ POWERSHELL_LINES=(
 'Set-Alias pip "pip3"'
 'Set-Alias code "code-insiders"'
 'Set-Alias claude "$HOME/.claude/local/claude"'
-'Set-Alias cc "./src/claude-commit.sh"'
-'Set-Alias ccommit "./src/claude-commit.sh"'
 )
 for line in "${POWERSHELL_LINES[@]}"; do
   grep -qxF "$line" "$POWERSHELL_PROFILE" || echo "$line" >> "$POWERSHELL_PROFILE"
