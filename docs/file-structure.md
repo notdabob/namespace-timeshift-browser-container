@@ -1,188 +1,135 @@
-# Project File Structure
+# File Structure
+
+## Project Organization
 
 ```mermaid
 graph TD
-    A[namespace-timeshift-browser-container/] --> B[Container Files]
-    A --> C[Application Services]
-    A --> D[Documentation]
-    A --> E[Development Tools]
+    A[namespace-timeshift-browser-container] --> B[.claude/]
+    A --> C[docker/]
+    A --> D[docs/]
+    A --> E[src/]
+    A --> F[deploy-proxmox.sh]
+    A --> G[Dockerfile]
+    A --> H[requirements.txt]
+    A --> I[README.md]
+    A --> J[PROXMOX-SETUP.md]
+    A --> K[DEPLOYMENT-SUMMARY.md]
+    A --> L[CLAUDE.md]
     
-    B --> F[Dockerfile]
-    B --> G[requirements.txt]
-    B --> H[deploy-proxmox.sh]
-    B --> I[docker/]
-    I --> I1[nginx.conf]
-    I --> I2[supervisord.conf]
-    I --> I3[start.sh]
+    B --> B1[commands/]
+    B1 --> B2[commit.md]
+    B --> B3[claude_command_setup.sh]
     
-    C --> J[src/]
-    J --> J1[idrac-container-api.py]
-    J --> J2[network-scanner.py]
-    J --> J3[dashboard-generator.py]
+    C --> C1[nginx.conf]
+    C --> C2[supervisord.conf]
+    C --> C3[start.sh]
     
-    D --> K[README.md]
-    D --> L[CLAUDE.md]
-    D --> M[PROXMOX-SETUP.md]
-    D --> N[DEPLOYMENT-SUMMARY.md]
-    D --> O[docs/]
-    O --> O1[file-structure.md]
-    O --> O2[CHANGELOG.md]
+    D --> D1[CHANGELOG.md]
+    D --> D2[file-structure.md]
+    D --> D3[ProjectOverView.md]
     
-    E --> P[.claude/]
-    P --> P1[commands/]
-    P1 --> P2[commit.md]
-    E --> Q[.gitignore]
-    E --> R[.dockerignore]
-
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#f0f8ff
-    style E fill:#ffe0e6
-    style F fill:#ffebcd
-    style G fill:#ffebcd
-    style H fill:#ffebcd
+    E --> E1[idrac-container-api.py]
+    E --> E2[network-scanner.py]
+    E --> E3[dashboard-generator.py]
+    E --> E4[idrac-api-server.py]
+    E --> E5[sync_shell_aliases.sh]
 ```
 
-## File Descriptions
+## Directory Structure
 
-### Container Infrastructure
-
-**Core container files for Proxmox deployment**
-
-- **Dockerfile**: Multi-service container definition with nginx, Python API, and network scanner
-- **requirements.txt**: Python dependencies (flask, requests, paramiko, python-nmap)
-- **deploy-proxmox.sh**: One-command deployment script for Proxmox hosts
-- **.dockerignore**: Excludes unnecessary files from container builds
-
-#### Docker Configuration (`docker/`)
-- **nginx.conf**: Web server configuration with API proxy and static file serving
-- **supervisord.conf**: Service management for running multiple processes in container
-- **start.sh**: Container startup script that initializes services and data
-
-### Application Services (`src/`)
-
-**Python services that run within the container**
-
-- **idrac-container-api.py**: Flask REST API server for SSH key management and server operations
-- **network-scanner.py**: Automated iDRAC discovery service that scans network every 5 minutes
-- **dashboard-generator.py**: Creates responsive web interface for server management
-
-### Documentation
-
-**User and developer documentation**
-
-- **README.md**: Main documentation with deployment instructions and feature overview
-- **CLAUDE.md**: Development guidance for Claude Code instances with troubleshooting
-- **PROXMOX-SETUP.md**: Detailed setup guide with advanced configuration options
-- **DEPLOYMENT-SUMMARY.md**: Quick reference for one-command deployment
-
-#### Extended Documentation (`docs/`)
-- **file-structure.md**: This file - project organization and architecture
-- **CHANGELOG.md**: Version history and feature additions
-
-### Development Tools
-
-**Version control and development workflow**
-
-- **.gitignore**: Excludes generated files, logs, and sensitive data
-- **.dockerignore**: Container build optimization
-
-#### Claude Code Commands (`.claude/`)
-- **commands/commit.md**: Smart commit command for automated version management
-
-## Container Architecture
-
-The solution uses a single Docker container with multiple managed services:
-
-### Runtime Structure
 ```
-Container (idrac-manager)
-├── nginx (Port 80) ──────────► Web Dashboard
-├── Python API (Port 8765) ───► REST API
-├── Network Scanner ──────────► Auto-discovery
-└── Supervisor ───────────────► Service Management
+namespace-timeshift-browser-container/
+├── .claude/                      # Claude Code project commands
+│   ├── commands/                 # Custom command definitions
+│   │   └── commit.md            # Smart commit with version management
+│   └── claude_command_setup.sh  # Command setup script
+├── docker/                       # Container configuration files
+│   ├── nginx.conf               # Web server configuration
+│   ├── supervisord.conf         # Process management configuration
+│   └── start.sh                 # Container startup script
+├── docs/                         # Project documentation
+│   ├── CHANGELOG.md             # Version history and changes
+│   ├── file-structure.md        # This file - project organization
+│   └── ProjectOverView.md       # Project overview documentation
+├── src/                          # Application source code
+│   ├── idrac-container-api.py   # REST API server for iDRAC operations
+│   ├── idrac-api-server.py      # Alternative API server implementation
+│   ├── network-scanner.py       # Network discovery service
+│   ├── dashboard-generator.py   # Web dashboard generator
+│   └── sync_shell_aliases.sh    # SSH alias management script
+├── deploy-proxmox.sh            # Main deployment script for Proxmox
+├── Dockerfile                   # Container build instructions
+├── requirements.txt             # Python package dependencies
+├── README.md                    # Project overview and quick start
+├── PROXMOX-SETUP.md            # Detailed Proxmox deployment guide
+├── DEPLOYMENT-SUMMARY.md       # Quick deployment reference
+└── CLAUDE.md                   # Claude Code AI assistant instructions
 ```
 
-### Data Flow
+## File Purposes
+
+### Root Level Files
+
+- **deploy-proxmox.sh**: Automated deployment script for Proxmox hosts
+- **Dockerfile**: Multi-stage build for the iDRAC management container
+- **requirements.txt**: Python dependencies for API and services
+- **README.md**: Project overview, features, and quick start guide
+- **PROXMOX-SETUP.md**: Comprehensive Proxmox deployment documentation
+- **DEPLOYMENT-SUMMARY.md**: Quick reference for deployment steps
+- **CLAUDE.md**: Instructions for Claude Code AI assistant
+
+### .claude/ Directory
+
+- **commands/commit.md**: Smart commit command with version management
+- **claude_command_setup.sh**: Script to set up Claude commands
+
+### docker/ Directory
+
+- **nginx.conf**: Web server configuration for dashboard and API proxy
+- **supervisord.conf**: Process management for container services
+- **start.sh**: Container initialization and service startup
+
+### docs/ Directory
+
+- **CHANGELOG.md**: Version history and release notes (single source of truth for versioning)
+- **file-structure.md**: Project organization documentation (this file)
+- **ProjectOverView.md**: Detailed project overview and architecture
+
+### src/ Directory
+
+- **idrac-container-api.py**: Flask-based REST API for iDRAC management
+- **idrac-api-server.py**: Alternative API server implementation
+- **network-scanner.py**: Automated network discovery for iDRAC servers
+- **dashboard-generator.py**: Dynamic HTML dashboard generator
+- **sync_shell_aliases.sh**: SSH configuration and alias management
+
+## Container Runtime Structure
+
+When the container is running, it creates additional directories:
+
 ```
-User Browser ──► nginx ──► Static Dashboard
-     │
-     └── API Calls ──► Python API ──► iDRAC Operations
-                                 │
-                                 └── SSH Key Management
-                                 └── Server Discovery
-```
-
-### Generated Files (Runtime)
-
-The container creates files at runtime in `/app/www/`:
-
-- **index.html**: Main dashboard interface (generated by dashboard-generator.py)
-- **data/discovered_idracs.json**: Server database with timestamps and status
-- **data/admin_config.json**: SSH key configuration and admin settings
-- **downloads/**: User download area for connection scripts
-
-## Deployment Architecture
-
-### Proxmox Integration
-```
-Proxmox Host
-├── Docker Engine
-└── Container (idrac-manager)
-    ├── Port 8080 ──► External Web Access
-    ├── Port 8765 ──► Internal API (localhost only)
-    └── Volume ─────► Persistent Data Storage
-```
-
-### Network Requirements
-- **Host Network Access**: Container needs access to iDRAC servers on ports 80/443/22
-- **External Access**: Users access web dashboard via Proxmox host IP on port 8080
-- **Internal API**: API server only accessible from Proxmox host for security
-
-## Migration from Legacy Solution
-
-### Deprecated Files (Removed)
-- ~~launch-idrac.sh~~ (macOS time-shifting script)
-- ~~launch-virtual-console.sh~~ (Local virtual console launcher)
-- ~~launch-timeshift-browser.sh~~ (Browser time-shifting)
-- ~~run_unblock_and_execute.sh~~ (macOS quarantine workaround)
-- ~~generate_easy_buttons.sh~~ (Local .command file generator)
-
-### Architecture Changes
-- **From**: macOS local scripts with time manipulation
-- **To**: Containerized web services with direct SSL access
-- **Benefits**: No quarantine issues, network-wide access, professional deployment
-
-## Security Considerations
-
-- **Container Isolation**: All services run within Docker container boundaries
-- **Network Security**: API server only accessible from Proxmox host
-- **Data Persistence**: Sensitive data stored in Docker volumes, not in git
-- **SSH Key Security**: Keys generated and stored securely within container
-- **Access Control**: Web dashboard provides read-only server information to users
-
-## Development Workflow
-
-### Container Development
-1. **Edit source files**: Modify Python services in `src/`
-2. **Update container**: Run `./deploy-proxmox.sh update`
-3. **Test changes**: Access dashboard and verify functionality
-4. **Commit changes**: Use `/project:commit` for version management
-
-### Local Testing
-```bash
-# Build container locally
-docker build -t idrac-manager:test .
-
-# Run for testing
-docker run -d --name test-container -p 8080:80 -p 8765:8765 idrac-manager:test
-
-# Check logs
-docker logs test-container
-
-# Clean up
-docker stop test-container && docker rm test-container
+/app/                            # Container application root
+├── www/                         # Web server document root
+│   ├── index.html              # Generated dashboard
+│   ├── data/                   # JSON data files
+│   │   ├── discovered_idracs.json
+│   │   └── admin_config.json
+│   └── downloads/              # Generated download scripts
+├── logs/                        # Application logs
+└── src/                         # Mounted source code
 ```
 
-This architecture provides a professional, enterprise-ready solution that completely eliminates macOS-specific issues while offering superior functionality and accessibility.
+## Data Persistence
+
+The container uses Docker volumes for persistent data:
+
+- **idrac-data**: Stores discovered servers and configuration
+- **Container filesystem**: SSH keys in /root/.ssh/
+- **Logs**: Available via docker logs command
+
+## Legacy Files (Not in Container)
+
+The following files exist in the repository but are not included in the containerized deployment:
+
+- `output/` directory: Contains temporary browser profiles and generated files from the legacy macOS solution
+- Various shell scripts replaced by Python implementations in the container

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.0] - 2025-07-02
+
+### Enhanced in v2.6.0 at 2025-07-02 14:22:33 EDT
+
+- Documentation formatting improvements across README.md
+- Enhanced PROXMOX-SETUP.md with clearer deployment instructions
+- Updated CLAUDE.md with GitHub integration guidance
+- Improved file-structure.md documentation reference patterns
+- Better markdown formatting for lists and code blocks
+
+### Changed in v2.6.0 at 2025-07-02 14:22:33 EDT
+
+- Commit command to use timestamp-based section headers for changelog
+- Documentation to emphasize file-structure.md as authoritative source
+
 ## [2.5.0] - 2025-07-02
 
 ### Added in v2.5.0
@@ -109,6 +124,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version History
 
+- **2.6.0** (2025-07-02): Documentation enhancements and formatting improvements
 - **2.5.0** (2025-07-02): Containerization and Python-based architecture for Proxmox deployment
 - **2.4.0** (2025-07-02): Simplified version management using CHANGELOG.md
 - **2.3.0** (2025-07-02): Smart commit command system

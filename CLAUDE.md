@@ -9,17 +9,20 @@ This is a containerized solution for managing Dell iDRAC servers through a profe
 ## Key Components
 
 ### Container Infrastructure
+
 - **Dockerfile**: Multi-service container with nginx, Python API, and network scanner
 - **deploy-proxmox.sh**: One-command deployment script for Proxmox hosts
 - **docker/**: Container configuration files (nginx.conf, supervisord.conf, start.sh)
 - **requirements.txt**: Python dependencies for container services
 
 ### Application Services
+
 - **idrac-container-api.py**: REST API server for SSH key management and server operations
-- **network-scanner.py**: Automated iDRAC discovery service that scans every 5 minutes  
+- **network-scanner.py**: Automated iDRAC discovery service that scans every 5 minutes
 - **dashboard-generator.py**: Creates responsive web interface for server management
 
 ### Documentation
+
 - **README.md**: Main documentation with deployment instructions
 - **PROXMOX-SETUP.md**: Detailed setup guide and troubleshooting
 - **DEPLOYMENT-SUMMARY.md**: Quick reference for deployment
@@ -35,7 +38,8 @@ The solution uses a multi-service Docker container architecture:
 5. **Data Persistence**: Docker volumes for server database and SSH keys
 
 ### Service Architecture
-```
+
+```text
 ┌─────────────────────────────────────┐
 │ Proxmox Host                        │
 │ ┌─────────────────────────────────┐ │
@@ -57,19 +61,22 @@ The solution uses a multi-service Docker container architecture:
 The container automatically installs and manages all dependencies:
 
 ### System Dependencies (via apt)
+
 - `openssh-client` (SSH key management)
-- `nmap` (network scanning) 
+- `nmap` (network scanning)
 - `curl`, `jq` (HTTP requests and JSON processing)
 - `nginx` (web server)
 - `supervisor` (service management)
 
 ### Python Dependencies (via pip)
+
 - `flask` (API server framework)
 - `requests` (HTTP client)
 - `paramiko` (SSH operations)
 - `python-nmap` (network scanning)
 
 ### Runtime Environment
+
 - Python 3.11
 - Docker container runtime
 - Proxmox VE host system
@@ -213,7 +220,7 @@ The container requires network access to:
 
 ### File Organization
 
-**IMPORTANT**: For complete file structure details, always reference the README.md as the authoritative source of project organization.
+**IMPORTANT**: For complete file structure details, always reference the docs/file-structure.md as the authoritative source of project organization.
 
 - **Container files**: `Dockerfile`, `requirements.txt`, `docker/`
 - **Application services**: `src/idrac-container-api.py`, `src/network-scanner.py`, `src/dashboard-generator.py`
@@ -255,12 +262,14 @@ Automated version management and commit creation:
 ```
 
 Features:
+
 - **Auto-detection**: Analyzes file changes to determine appropriate version increment
 - **Version Management**: Updates CHANGELOG.md automatically
 - **Smart Messages**: Generates contextual commit messages based on changes
 - **Claude Attribution**: Includes proper Claude Code attribution in commits
 
 **Version Increment Rules:**
+
 - `patch`: Bug fixes, documentation updates, small improvements
 - `minor`: New features, script additions, significant enhancements
 - `major`: Breaking changes, major architectural updates
@@ -334,7 +343,7 @@ The container solution completely eliminates the macOS quarantine problem by pro
 
 ## GitHub Integration
 
-**Repository**: https://github.com/notdabob/namespace-timeshift-browser-container
+**Repository**: <https://github.com/notdabob/namespace-timeshift-browser-container>
 
 ### Development Workflow with GitHub
 
@@ -350,6 +359,7 @@ The container solution completely eliminates the macOS quarantine problem by pro
 ### Version Management
 
 The project uses semantic versioning managed through:
+
 - **CHANGELOG.md**: Tracks all version changes and features
 - **Git tags**: Release versions are tagged in Git
 - **Claude Commands**: `/project:commit` automates version bumps

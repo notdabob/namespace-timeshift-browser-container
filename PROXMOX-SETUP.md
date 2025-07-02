@@ -5,6 +5,7 @@ This guide shows how to deploy a containerized iDRAC management solution on your
 ## Overview
 
 The container solution provides:
+
 - 🌐 **Web-based dashboard** accessible from any device
 - 🔍 **Automatic network scanning** for iDRAC servers
 - 🔑 **SSH key management** for passwordless access
@@ -39,6 +40,7 @@ chmod +x deploy-proxmox.sh
 ### 3. Access Dashboard
 
 Open your browser and navigate to:
+
 ```
 http://YOUR-PROXMOX-IP:8080
 ```
@@ -95,6 +97,7 @@ http://YOUR-PROXMOX-IP:8080
 ### Network Requirements
 
 The container needs network access to:
+
 - iDRAC servers on ports 80/443
 - SSH access to iDRAC servers on port 22 (for key deployment)
 
@@ -112,16 +115,19 @@ Access the dashboard at `http://proxmox-ip:8080`:
 ### SSH Key Management
 
 1. **Generate SSH Key**:
+
    - Enter admin email address
    - Click "Generate SSH Key"
    - Key stored in container at `/root/.ssh/idrac_rsa`
 
 2. **Deploy to Servers**:
+
    - Click "Deploy to All Servers"
    - Updates SSH config automatically
    - Enables passwordless access
 
 3. **SSH Access**:
+
    ```bash
    # From Proxmox host
    docker exec -it idrac-manager ssh idrac-192-168-1-23
@@ -253,13 +259,15 @@ API_PORT="8765"     # Change to desired port
 ### Monitoring Integration
 
 Prometheus metrics endpoint available at:
-```
+
+```html
 http://proxmox-ip:8765/metrics
 ```
 
 ## Support
 
 For issues and questions:
+
 1. Check container logs: `docker logs idrac-manager`
 2. Verify network connectivity to iDRAC servers
 3. Ensure Proxmox has sufficient resources

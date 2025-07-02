@@ -7,6 +7,7 @@ A containerized solution for managing Dell iDRAC servers through a professional 
 This solution provides centralized iDRAC management through a Docker container that runs on your Proxmox host. It eliminates macOS quarantine issues, provides network-wide access, and offers a professional web-based management interface.
 
 **Key Benefits:**
+
 - 🌐 **Access from any device** - Web dashboard works on phones, tablets, laptops
 - 🚫 **No macOS quarantine issues** - Everything is browser-based
 - 🔍 **Auto-discovery** - Finds all iDRAC servers automatically
@@ -26,6 +27,7 @@ This solution provides centralized iDRAC management through a Docker container t
 ### One-Command Deployment
 
 **If you need to SSH to Proxmox first:**
+
 ```bash
 # 1. SSH to your Proxmox host
 ssh root@your-proxmox-host
@@ -40,6 +42,7 @@ chmod +x deploy-proxmox.sh
 ```
 
 **If you're already on your Proxmox shell:**
+
 ```bash
 # Clone and deploy in one go
 git clone https://github.com/notdabob/namespace-timeshift-browser-container.git && \
@@ -51,6 +54,7 @@ chmod +x deploy-proxmox.sh && \
 The deployment script will automatically detect your Proxmox host IP and provide you with a clickable dashboard URL when deployment completes.
 
 That's it! The container will automatically:
+
 - ✅ Install Docker if needed
 - ✅ Build the iDRAC management container
 - ✅ Start all services (web server, API, network scanner)
@@ -60,18 +64,21 @@ That's it! The container will automatically:
 ## Dashboard Features
 
 ### 📊 Server Management
+
 - **Auto-discovery**: Scans network every 5 minutes for iDRAC servers
 - **Status monitoring**: Real-time online/offline status
 - **One-click access**: Direct links to iDRAC web interfaces
 - **Virtual Console**: Instant console access without downloads
 
 ### 🔐 SSH Key Management
+
 - **Generate SSH keys**: RSA 4096-bit with email identification
 - **Deploy to servers**: One-click deployment to all online iDRACs
 - **Passwordless access**: SSH directly using auto-configured aliases
 - **Secure storage**: Keys stored safely within container
 
 ### 🌐 Network-Wide Access
+
 - **Any device**: Access from computers, phones, tablets
 - **Professional UI**: Clean, responsive web interface
 - **Real-time updates**: Dashboard refreshes automatically
@@ -80,6 +87,7 @@ That's it! The container will automatically:
 ## Default Credentials
 
 **iDRAC Access:**
+
 - Username: `root`
 - Password: `calvin`
 
@@ -88,6 +96,7 @@ These are the standard Dell iDRAC6 factory defaults.
 ## Container Management
 
 ### Status and Monitoring
+
 ```bash
 # Check container status
 ./deploy-proxmox.sh status
@@ -101,6 +110,7 @@ docker logs idrac-manager
 ```
 
 ### Updates and Maintenance
+
 ```bash
 # Update to latest version from GitHub
 git pull origin main
@@ -118,7 +128,7 @@ docker stop idrac-manager
 
 ## File Structure
 
-```
+```text
 namespace-timeshift-browser-container/
 ├── 🐳 Container Components
 │   ├── Dockerfile                         # Multi-service container definition
@@ -150,7 +160,8 @@ namespace-timeshift-browser-container/
 ## How It Works
 
 ### Container Architecture
-```
+
+```text
 ┌─────────────────────────────────────┐
 │ Proxmox Host                        │
 │ ┌─────────────────────────────────┐ │
@@ -170,6 +181,7 @@ namespace-timeshift-browser-container/
 ```
 
 ### Service Components
+
 1. **nginx Web Server** - Serves dashboard and handles routing
 2. **Python API Server** - Manages SSH keys, server operations
 3. **Network Scanner** - Discovers iDRAC servers automatically
@@ -179,6 +191,7 @@ namespace-timeshift-browser-container/
 ## Troubleshooting
 
 ### Container Won't Start
+
 ```bash
 # Check logs for errors
 docker logs idrac-manager
@@ -192,6 +205,7 @@ systemctl restart docker
 ```
 
 ### No Servers Discovered
+
 ```bash
 # Test network scanning manually
 docker exec -it idrac-manager python3 /app/src/network-scanner.py
@@ -204,6 +218,7 @@ docker exec -it idrac-manager cat /app/src/network-scanner.py
 ```
 
 ### Dashboard Not Loading
+
 ```bash
 # Check nginx status
 docker exec -it idrac-manager nginx -t
@@ -216,6 +231,7 @@ docker exec -it idrac-manager supervisorctl status
 ```
 
 ### SSH Key Deployment Fails
+
 ```bash
 # Test SSH connectivity to iDRAC
 docker exec -it idrac-manager ssh -o ConnectTimeout=10 root@idrac-ip
@@ -224,21 +240,30 @@ docker exec -it idrac-manager ssh -o ConnectTimeout=10 root@idrac-ip
 # Navigate: iDRAC Settings → Network → Services → SSH
 ```
 
+### For deployment issues
+
+1. **Check container logs**: `docker logs idrac-manager`
+2. **Verify network connectivity**: Test access to iDRAC servers
+3. **Review system resources**: Ensure adequate CPU/memory
+4. **Check service status**: `docker exec -it idrac-manager supervisorctl status`
+5. **Update to latest**: `git pull && ./deploy-proxmox.sh update`
+
 ## Comparison: Container vs macOS Solution
 
-| Feature | macOS Time-Shift | Container Solution |
-|---------|------------------|-------------------|
-| **Deployment** | Complex setup | One command |
-| **Access** | Single Mac only | Network-wide |
-| **Quarantine Issues** | ❌ Constant problems | ✅ None |
-| **Time Manipulation** | ❌ Required | ✅ Not needed |
-| **Professional Use** | ❌ Dev tool | ✅ Enterprise ready |
-| **Multi-user** | ❌ Single user | ✅ Concurrent access |
-| **Maintenance** | ❌ Manual updates | ✅ Container updates |
+| Feature               | macOS Time-Shift     | Container Solution   |
+| --------------------- | -------------------- | -------------------- |
+| **Deployment**        | Complex setup        | One command          |
+| **Access**            | Single Mac only      | Network-wide         |
+| **Quarantine Issues** | ❌ Constant problems | ✅ None              |
+| **Time Manipulation** | ❌ Required          | ✅ Not needed        |
+| **Professional Use**  | ❌ Dev tool          | ✅ Enterprise ready  |
+| **Multi-user**        | ❌ Single user       | ✅ Concurrent access |
+| **Maintenance**       | ❌ Manual updates    | ✅ Container updates |
 
 ## Advanced Configuration
 
 ### Custom Network Scanning
+
 ```bash
 # Edit scanner for custom IP ranges
 docker exec -it idrac-manager vi /app/src/network-scanner.py
@@ -246,13 +271,16 @@ docker restart idrac-manager
 ```
 
 ### Custom Ports
+
 Edit `deploy-proxmox.sh` before deployment:
+
 ```bash
 HTTP_PORT="8080"    # Web dashboard port
 API_PORT="8765"     # API server port
 ```
 
 ### Backup and Restore
+
 ```bash
 # Backup container data
 docker run --rm -v idrac-data:/data -v $(pwd):/backup ubuntu tar czf /backup/idrac-backup.tar.gz -C /data .
@@ -263,13 +291,39 @@ docker run --rm -v idrac-data:/data -v $(pwd):/backup ubuntu tar xzf /backup/idr
 
 ## Security Considerations
 
-- **Network Access**: Container uses host networking for iDRAC discovery
-- **SSH Keys**: Securely stored within container filesystem
-- **API Security**: API server only accessible from Proxmox host
-- **Default Credentials**: Change default iDRAC passwords after setup
+- **Network Access**: Container requires host networking (`--network host`) for iDRAC discovery, or ensure appropriate ports are mapped if using bridge mode
+- **API Security**: API server is bound to localhost (127.0.0.1) and only accessible from the Proxmox host; if configured to bind to all interfaces, access is restricted by firewall rules.
+- **Default Credentials**: **You MUST change default iDRAC passwords after setup to prevent unauthorized access.**
 - **Data Persistence**: All data stored in Docker volumes
+- **Container Isolation**: All services run within Docker container boundaries
+- **Data Persistence**: Sensitive data stored in Docker volumes, not in git
+- **SSH Key Security**: Keys generated and stored securely within container
+- **Access Control**: Web dashboard provides read-only server information to users, while management actions (such as SSH key deployment) are available to authorized users
 
 ## Development Workflow
+
+### Container Development
+
+1. **Edit source files**: Modify Python services in `src/`
+2. **Update container**: Run `./deploy-proxmox.sh update`
+3. **Test changes**: Access dashboard and verify functionality
+4. **Commit changes**: Use `/project:commit` for version management
+
+### Local Testing
+
+```bash
+# Build container locally
+docker build -t idrac-manager:test .
+
+# Run for testing
+docker run -d --name test-container -p 8080:80 -p 8765:8765 idrac-manager:test
+
+# Check logs
+docker logs test-container
+
+# Clean up
+docker stop test-container && docker rm test-container
+```
 
 ### Smart Commit Command
 
@@ -282,6 +336,7 @@ This project includes a custom Claude Code command for version management:
 ```
 
 The command automatically:
+
 - Analyzes file changes for appropriate version increment
 - Updates CHANGELOG.md with version entries
 - Creates properly formatted git commits
@@ -289,7 +344,7 @@ The command automatically:
 
 ## GitHub Repository
 
-**Source Code**: https://github.com/notdabob/namespace-timeshift-browser-container
+**Source Code**: <https://github.com/notdabob/namespace-timeshift-browser-container>
 
 ### Contributing
 
@@ -306,16 +361,26 @@ The command automatically:
 - **Feature Requests**: [Open a feature request](https://github.com/notdabob/namespace-timeshift-browser-container/issues) with detailed requirements
 - **Questions**: Check existing [discussions](https://github.com/notdabob/namespace-timeshift-browser-container/discussions) or start a new one
 
-### Troubleshooting
+## Deployment Architecture
 
-For deployment issues:
+### Proxmox Integration
 
-1. **Check container logs**: `docker logs idrac-manager`
-2. **Verify network connectivity**: Test access to iDRAC servers
-3. **Review system resources**: Ensure adequate CPU/memory
-4. **Check service status**: `docker exec -it idrac-manager supervisorctl status`
-5. **Update to latest**: `git pull && ./deploy-proxmox.sh update`
+```text
+Proxmox Host
+├── Docker Engine
+└── Container (idrac-manager)
+    ├── Port 8080 ──► External Web Access
+    ├── Port 8765 ──► Internal API (localhost only)
+    └── Volume ─────► Persistent Data Storage
+```
+
+### Network Requirements
+
+- **Host Network Access**: Container needs access to iDRAC servers on ports 80/443/22
+- **External Access**: Users access web dashboard via Proxmox host IP on port 8080
+- **Internal API**: API server only accessible from Proxmox host for security
 
 ## License
 
 This tool is designed for legitimate network administration tasks to access Dell iDRAC hardware in enterprise environments.
+This architecture provides a professional, enterprise-ready solution that completely eliminates macOS-specific issues while offering superior functionality and accessibility.
