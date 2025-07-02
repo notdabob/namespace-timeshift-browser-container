@@ -10,6 +10,10 @@ HTML_FILE="${SCRIPT_DIR}/idrac-dashboard.html"
 DISCOVERED_FILE="${SCRIPT_DIR}/discovered_idracs.json"
 TARGET_DATE="2020-01-01 12:00:00"
 
+# Default iDRAC credentials
+DEFAULT_USERNAME="root"
+DEFAULT_PASSWORD="calvin"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -321,6 +325,56 @@ scan_network() {
     rm -f "$temp_results"
     
     print_success "Network scan complete! Found $count active server(s)"
+}
+
+# Function to generate easy buttons for discovered servers
+generate_easy_buttons() {
+    print_status "Generating easy-click buttons..."
+    
+    if [ ! -f "$DISCOVERED_FILE" ]; then
+        print_warning "No discovered servers file found, skipping easy buttons generation"
+        return 0
+    fi
+    
+    local button_count=0
+    local EASY_BUTTON_PREFIX="launch-virtual-console"
+    
+    # Check if jq is available, install if needed
+    if ! command -v jq &> /dev/null; then
+        print_status "Installing jq for JSON parsing..."
+        brew install jq
+    fi
+    
+    # Parse each server and generate a .command file
+    if command -v jq &> /dev/null; then
+        # Use process substitution to avoid subshell and preserve button_count
+        while read -r url; do
+            if [ -n "$url" ]; then
+                # Extract IP from URL
+                local ip=$(echo "$url" | sed -E 's|https?://([^/]+).*|\1|')
+                local button_file="${SCRIPT_DIR}/${EASY_BUTTON_PREFIX}-${ip}.command"
+                
+                cat > "$button_file" <<EOF
+#!/bin/bash
+cd "\$(dirname "\$0")"
+./launch-virtual-console.sh $ip
+EOF
+                chmod +x "$button_file"
+                print_success "Created easy button: $(basename "$button_file")"
+                ((button_count++))
+            fi
+        done < <(jq -r '.servers[] | select(.status=="online") | .url' "$DISCOVERED_FILE")
+    else
+        print_warning "jq not available, skipping easy buttons generation"
+        return 0
+    fi
+    
+    if [ $button_count -gt 0 ]; then
+        print_success "Generated $button_count easy-click buttons!"
+        echo "Double-click any 'launch-virtual-console-*.command' file to instantly connect"
+    else
+        print_warning "No online servers found for easy button generation"
+    fi
 }
 
 # Function to generate HTML dashboard
@@ -672,6 +726,7 @@ generate_dashboard() {
             <div class="info-title">📋 Instructions</div>
             <ul class="info-list">
                 <li>✅ SSL certificates are now valid (time set to 2020)</li>
+                <li>🔑 Default credentials: <strong>Username: root | Password: calvin</strong></li>
                 <li>🔗 Click "Access iDRAC" to open any server below</li>
                 <li>🚀 Launch Virtual Console - JNLP files will work automatically</li>
                 <li>⚙️ First time: Configure Chrome to use the JNLP handler when prompted</li>
@@ -1045,7 +1100,7 @@ launch_chrome() {
     echo ""
     echo "📋 Instructions:"
     echo "1. Use the dashboard to click on any iDRAC server"
-    echo "2. Login with your normal credentials"
+    echo "2. Login with default credentials: Username: root | Password: calvin"
     echo "3. Click 'Launch Virtual Console' - JNLP files will be handled automatically"
     echo "4. First time: Configure Chrome to use: $JNLP_INTERCEPTOR_SCRIPT"
     echo ""
@@ -1102,15 +1157,19 @@ main() {
     scan_network
     echo ""
     
-    print_status "Step 3/4: Generating dashboard..."
+    print_status "Step 3/5: Generating dashboard..."
     generate_dashboard
     echo ""
     
+    print_status "Step 4/5: Creating easy-click buttons..."
+    generate_easy_buttons
+    echo ""
+    
     if [ "$test_mode" = true ]; then
-        print_success "Test mode complete! Dashboard generated at: $HTML_FILE"
+        print_success "Test mode complete! Dashboard and easy buttons generated at: $HTML_FILE"
         print_status "To launch Chrome, run: $0 (without --test)"
     else
-        print_status "Step 4/4: Launching time-shifted Chrome..."
+        print_status "Step 5/5: Launching time-shifted Chrome..."
         launch_chrome
     fi
 }
@@ -1123,7 +1182,8 @@ if [[ "$1" == "--help" || "$1" == "-h" ]]; then
     echo "1. Installs all required dependencies"
     echo "2. Scans your network for iDRAC servers"
     echo "3. Creates a beautiful dashboard webpage"
-    echo "4. Launches Chrome with time-shifted SSL certificates"
+    echo "4. Generates easy-click .command files for instant access"
+    echo "5. Launches Chrome with time-shifted SSL certificates"
     echo ""
     echo "Usage: $0 [--test]"
     echo ""

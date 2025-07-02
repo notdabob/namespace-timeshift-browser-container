@@ -19,6 +19,7 @@ This solution uses time manipulation to allow connections to legacy Dell iDRAC6 
 ### Usage
 
 1. **Double-click the script**
+
    ```bash
    ./launch-idrac.sh
    ```
@@ -26,28 +27,62 @@ This solution uses time manipulation to allow connections to legacy Dell iDRAC6 
 That's literally it! 🎉
 
 The script automatically:
+
 - ✅ Checks and installs ALL dependencies (Homebrew, Chrome, etc.)
 - ✅ Scans your network for iDRAC servers and tracks their status
 - ✅ Creates a beautiful dashboard with server management features
+- ✅ **NEW:** Generates easy-click .command files for instant Virtual Console access
 - ✅ Opens time-shifted Chrome with valid SSL certificates
 - ✅ Shows you clickable links to all your iDRAC servers
 - ✅ Handles JNLP files automatically for Virtual Console access
 - ✅ Tracks when servers were first/last seen for easy management
 - ✅ Provides one-click cleanup of offline servers
 
-### First Time JNLP Setup
+### Three Ways to Access iDRAC
 
-The very first time you click "Launch Virtual Console" on any iDRAC:
+**🔥 FASTEST - Easy-Click Buttons (NEW!)**
+After running the script once, you'll find `.command` files in your project folder:
+
+- `launch-virtual-console-192.168.1.23.command`
+- `launch-virtual-console-192.168.1.45.command`
+- etc.
+
+Just **double-click any .command file** for instant Virtual Console access!
+
+**Dashboard Method**
+Use the HTML dashboard that opens automatically:
+
+- Click "🔗 Access iDRAC" for web interface
+- Click "🖥️ Virtual Console" for JNLP download
+
+**Command Line Method**
+
+```bash
+./launch-virtual-console.sh 192.168.1.23
+```
+
+### 🔑 Default Credentials
+
+All iDRAC servers use these default credentials:
+
+- **Username:** `root`
+- **Password:** `calvin`
+
+These are the standard Dell iDRAC6 factory defaults.
+
+### First Time JNLP Setup (One Time Only)
+
+The very first time you use Virtual Console:
 
 1. Chrome will ask what to do with the `.jnlp` file
-2. Click "Open with" → "Choose..." 
+2. Click "Open with" → "Choose..."
 3. Navigate to your project folder
 4. Select `jnlp-interceptor.sh` (created automatically)
-5. **Don't** check "Do this automatically"
+5. Check "Always open with this application"
 
 After that, all JNLP files will work automatically!
 
-### That's Really It!
+### That's Really It
 
 No advanced options needed - the script does everything for you automatically. Just double-click `launch-idrac.sh` whenever you need to access your iDRAC servers.
 
@@ -55,13 +90,16 @@ No advanced options needed - the script does everything for you automatically. J
 
 ```
 time-shift-idrac/
-├── launch-idrac.sh               # 🚀 THE MAGIC SCRIPT - just double-click this!
-├── discovered_idracs.json        # Server database (auto-generated)
-├── idrac-dashboard.html          # Dashboard webpage (auto-generated)
-├── jnlp-interceptor.sh           # JNLP handler (auto-generated)
-├── docs/                        # Documentation  
-├── viewer.jnlp                  # Example iDRAC6 JNLP file
-└── README.md                    # This file
+├── launch-idrac.sh                        # 🚀 THE MAGIC SCRIPT - just double-click this!
+├── discovered_idracs.json                 # Server database (auto-generated)
+├── idrac-dashboard.html                   # Dashboard webpage (auto-generated)
+├── jnlp-interceptor.sh                    # JNLP handler (auto-generated)
+├── launch-virtual-console-*.command       # 🔥 Easy-click buttons (auto-generated)
+├── launch-virtual-console.sh              # Direct Virtual Console launcher
+├── generate_easy_buttons.sh               # Easy button generator (integrated)
+├── docs/                                 # Documentation  
+├── viewer.jnlp                           # Example iDRAC6 JNLP file
+└── README.md                             # This file
 ```
 
 **Clean & Simple!** Everything you need is in one script - no more scattered files or complex folder structures.
@@ -70,29 +108,34 @@ time-shift-idrac/
 
 Behind the scenes, the magic script:
 
-1. **Auto-installs everything**: Homebrew, coreutils, libfaketime, Chrome, Java agents
-2. **Scans your network**: Finds all iDRAC servers automatically 
-3. **Creates a dashboard**: Beautiful webpage with all your servers
-4. **Time manipulation**: Uses libfaketime to make applications see 2020-01-01 for valid SSL certificates
-5. **Launches Chrome**: With time manipulation active and the dashboard loaded
+1. **Auto-installs everything**: Homebrew, coreutils, libfaketime, jq, Chrome, Java agents
+2. **Scans your network**: Finds all iDRAC servers automatically on ports 80/443
+3. **Creates a dashboard**: Beautiful webpage with all your servers and status tracking
+4. **Generates easy buttons**: Creates .command files for instant Virtual Console access
+5. **Time manipulation**: Uses libfaketime to make applications see 2020-01-01 for valid SSL certificates
+6. **Launches Chrome**: With time manipulation active and the dashboard loaded
 
 ## Troubleshooting
 
-### If something goes wrong:
+### If something goes wrong
 
 **Problem: Script won't run**
-- Make sure you're running `./launch-idrac.sh` 
+
+- Make sure you're running `./launch-idrac.sh`
 - The script needs to be executable: `chmod +x launch-idrac.sh`
 
 **Problem: No iDRAC servers found**
+
 - The script scans your local network automatically
 - You can manually navigate to your iDRAC IP in the opened Chrome window
 
 **Problem: JNLP files don't work**
+
 - First time: Configure Chrome to use the `jnlp-interceptor.sh` script
 - The script creates this file automatically and tells you exactly where it is
 
 **Problem: Still getting SSL errors**
+
 - Make sure you're using the Chrome window opened by the script
 - Don't use your regular Chrome browser
 
