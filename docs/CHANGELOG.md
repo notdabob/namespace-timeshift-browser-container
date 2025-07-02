@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.2] - 2025-07-02
+
+### Fixed in v2.6.2 at 2025-07-02 15:23:48 EDT
+
+- Corrected Proxmox VE detection path from `/etc/pve/version` to `/etc/pve/.version`
+- Added additional verification using `pvesh` command availability
+- Fixed deployment script failing on actual Proxmox VE hosts
+
 ## [2.6.1] - 2025-07-02
 
 ### Improved in v2.6.1 at 2025-07-02 14:47:21 EDT
@@ -141,6 +149,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version History
 
+- **2.6.2** (2025-07-02): Fixed Proxmox VE detection path in deployment script
 - **2.6.1** (2025-07-02): Improved file structure documentation and shell alias enhancements
 - **2.6.0** (2025-07-02): Documentation enhancements and formatting improvements
 - **2.5.0** (2025-07-02): Containerization and Python-based architecture for Proxmox deployment

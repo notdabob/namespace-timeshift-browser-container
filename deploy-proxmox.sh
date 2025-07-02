@@ -26,14 +26,18 @@ print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # Function to check if running on Proxmox
 check_proxmox() {
-    if [ ! -f /etc/pve/version ]; then
+    if [ ! -f /etc/pve/.version ]; then
         print_error "This script is designed to run on Proxmox VE hosts"
         print_error "If you're running on a different system, you can still use the Docker commands manually"
         exit 1
     fi
     
-    local pve_version=$(cat /etc/pve/version)
-    print_success "Proxmox VE detected: $pve_version"
+    # The .version file contains JSON data, so let's just check for pvesh command instead
+    if command -v pvesh &> /dev/null; then
+        print_success "Proxmox VE detected"
+    else
+        print_warning "Proxmox VE version file found but pvesh command not available"
+    fi
 }
 
 # Function to install Docker if not present
