@@ -112,7 +112,7 @@ These are the standard Dell iDRAC6 factory defaults.
 
 ```bash
 # Check container status
-./deploy-proxmox.sh status
+
 
 # View real-time logs
 ./deploy-proxmox.sh logs

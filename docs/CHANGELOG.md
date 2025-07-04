@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.0] - 2025-07-04
+
+### Fixed in v3.2.0 at 2025-07-04 01:21:44 EDT
+
+- Supervisor startup issues - added fallback mechanisms when supervisord not found
+- Service startup failures - manual service launch if supervisor fails
+- Container startup robustness with better error handling
+- Missing jq dependency in test scripts
+
+### Added in v3.2.0 at 2025-07-04 01:21:44 EDT
+
+- `emergency-fix.sh` - Emergency repair script for broken container services
+- `container-rebuild.sh` - Complete container rebuild with debug output
+- `restart-fix.sh` - Quick restart and verification script
+- `fix-container.sh` - Manual service startup script
+- Fallback service startup in start.sh when supervisor fails
+- Better error messages during container initialization
+
+### Enhanced in v3.2.0 at 2025-07-04 01:21:44 EDT
+
+- Container start script with supervisor path detection
+- Service startup with multiple fallback options
+- Debug scripts with comprehensive service checking
+- Container rebuild process with dependency installation
+
 ## [3.1.0] - 2025-07-04
 
 ### Fixed in v3.1.0 at 2025-07-04 00:58:37 EDT
