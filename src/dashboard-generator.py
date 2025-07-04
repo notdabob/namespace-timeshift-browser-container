@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Dashboard Generator for Container Deployment
-Creates web-based iDRAC management interface
+Multi-Server Dashboard Generator
+Creates web-based management interface for all server types
 """
 
 import os
@@ -21,7 +21,7 @@ def generate_dashboard():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iDRAC Management Dashboard - Container Edition</title>
+    <title>Homelab Server Management Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -61,7 +61,7 @@ def generate_dashboard():
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -75,7 +75,34 @@ def generate_dashboard():
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         
-        .management-tools, .ssh-management {
+        .server-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .management-tools, .ssh-management, .network-scan {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 15px;
@@ -84,9 +111,24 @@ def generate_dashboard():
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         
-        .management-tools h3, .ssh-management h3 {
+        .management-tools h3, .ssh-management h3, .network-scan h3 {
             margin-bottom: 15px;
             color: #2c3e50;
+        }
+        
+        .custom-scan-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .network-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
         }
         
         .ssh-form {
@@ -99,8 +141,7 @@ def generate_dashboard():
         
         .email-input {
             flex: 1;
-            min-width: 250px;
-            padding: 10px 15px;
+            padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
@@ -109,67 +150,42 @@ def generate_dashboard():
         
         .email-input:focus {
             outline: none;
-            border-color: #3498db;
-        }
-        
-        .api-status {
-            padding: 8px 12px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        
-        .api-status.online {
-            background: #d5fdd5;
-            color: #27ae60;
-        }
-        
-        .api-status.offline {
-            background: #fdd5d5;
-            color: #e74c3c;
-        }
-        
-        .ssh-status {
-            padding: 8px 12px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-        
-        .ssh-status.ready {
-            background: #d5fdd5;
-            color: #27ae60;
-        }
-        
-        .ssh-status.not-ready {
-            background: #fdd5d5;
-            color: #e74c3c;
-        }
-        
-        .tool-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            border-color: #667eea;
         }
         
         .tool-button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
             transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .primary-button {
-            background: #3498db;
+            background: #667eea;
             color: white;
         }
         
         .primary-button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .secondary-button {
+            background: #3498db;
+            color: white;
+        }
+        
+        .secondary-button:hover {
             background: #2980b9;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
         }
         
         .success-button {
@@ -179,403 +195,508 @@ def generate_dashboard():
         
         .success-button:hover {
             background: #219a52;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
         }
         
-        .warning-button {
+        .export-button {
             background: #f39c12;
             color: white;
         }
         
-        .warning-button:hover {
+        .export-button:hover {
             background: #e67e22;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
         }
         
-        .danger-button {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .danger-button:hover {
-            background: #c0392b;
-            transform: scale(1.05);
-        }
-        
-        .servers-grid {
+        .server-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
         
         .server-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
+            border: 2px solid transparent;
         }
         
         .server-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border-color: #667eea;
         }
         
-        .server-card.offline {
-            opacity: 0.7;
-            border-left: 5px solid #e74c3c;
+        .server-type-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
         
-        .server-card.online {
-            border-left: 5px solid #27ae60;
-        }
+        .type-idrac { background: #e74c3c; color: white; }
+        .type-proxmox { background: #f39c12; color: white; }
+        .type-linux { background: #2ecc71; color: white; }
+        .type-windows { background: #3498db; color: white; }
+        .type-vnc { background: #9b59b6; color: white; }
+        .type-unknown { background: #95a5a6; color: white; }
         
-        .server-status {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-online {
-            background: #d5fdd5;
-            color: #27ae60;
-        }
-        
-        .status-offline {
-            background: #fdd5d5;
-            color: #e74c3c;
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
         }
         
         .server-title {
-            font-size: 1.3em;
-            font-weight: bold;
+            font-size: 18px;
+            font-weight: 600;
             color: #2c3e50;
-            margin-bottom: 10px;
-            margin-right: 60px;
+            margin-bottom: 5px;
         }
         
         .server-url {
             color: #7f8c8d;
-            font-size: 0.9em;
-            margin-bottom: 15px;
+            font-size: 14px;
             word-break: break-all;
         }
         
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .server-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            color: #7f8c8d;
+        }
+        
+        .detail-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
         .server-actions {
+            margin-top: 15px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
         
-        .access-button {
-            flex: 1;
-            padding: 12px 20px;
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            transition: all 0.3s ease;
+        .action-button {
+            padding: 8px 16px;
             border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
         
-        .access-button:hover {
-            background: linear-gradient(45deg, #2980b9, #1f5f8b);
-            transform: scale(1.02);
+        .connect-button {
+            background: #667eea;
+            color: white;
         }
         
-        .access-button.disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .console-button {
-            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
-        }
-        
-        .console-button:hover {
-            background: linear-gradient(45deg, #c0392b, #a93226) !important;
+        .connect-button:hover {
+            background: #5a67d8;
         }
         
         .remove-button {
-            padding: 12px 15px;
             background: #e74c3c;
             color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
         }
         
         .remove-button:hover {
             background: #c0392b;
-            transform: scale(1.05);
         }
         
-        .no-servers {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
+        .info-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #0c5460;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #155724;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #721c24;
         }
         
         .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
             color: #7f8c8d;
         }
         
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
             color: white;
-            font-weight: bold;
-            z-index: 1000;
-            display: none;
+            font-size: 14px;
         }
         
-        .notification.success {
-            background: #27ae60;
+        .footer a {
+            color: white;
+            text-decoration: underline;
         }
         
-        .notification.error {
-            background: #e74c3c;
-        }
-        
-        .notification.info {
-            background: #3498db;
+        @media (max-width: 768px) {
+            .server-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .ssh-form {
+                flex-direction: column;
+            }
+            
+            .email-input {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🖥️ iDRAC Management Dashboard</h1>
-        <p>Container-Based Server Management</p>
-        <div class="container-badge">
-            🐳 Container Edition - No macOS Quarantine Issues!
-        </div>
+        <h1>🖥️ Homelab Server Management</h1>
+        <div class="container-badge">🐳 Container Edition - Multi-Server Discovery</div>
     </div>
     
     <div class="container">
         <div class="status-panel">
-            <h3>📊 System Status</h3>
-            <div id="system-status">
-                <span>API Server:</span> 
-                <span class="api-status" id="api-status">🔄 Checking...</span>
-                <span style="margin-left: 20px;">Last Scan:</span> 
-                <span id="last-scan">Loading...</span>
+            <h2>📊 System Status</h2>
+            <div id="status-info">
+                <p class="info-message">Loading system status...</p>
             </div>
         </div>
         
+        <div class="network-scan">
+            <h3>🔍 Network Discovery</h3>
+            <div class="custom-scan-form">
+                <input type="text" 
+                       id="custom-ranges" 
+                       class="network-input" 
+                       placeholder="Enter custom ranges (e.g., 192.168.1.0/24, 10.0.0.0/24)"
+                       value="">
+                <button class="tool-button primary-button" onclick="scanCustomRanges()">
+                    🔍 Scan Custom Ranges
+                </button>
+                <button class="tool-button secondary-button" onclick="rescanNetwork()">
+                    🔄 Rescan Default Network
+                </button>
+            </div>
+            <div id="scan-status"></div>
+        </div>
+        
         <div class="management-tools">
-            <h3>🛠️ Server Management</h3>
-            <div class="tool-buttons">
-                <button class="tool-button danger-button" onclick="cleanupOfflineServers()">
-                    🗑️ Remove Offline Servers
+            <h3>🛠️ Management Tools</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="tool-button export-button" onclick="exportToRDM('json')">
+                    📤 Export to RDM (JSON)
                 </button>
-                <button class="tool-button primary-button" onclick="rescanNetwork()">
-                    🔄 Rescan Network
+                <button class="tool-button export-button" onclick="exportToRDM('rdm')">
+                    📤 Export to RDM (XML)
                 </button>
-                <button class="tool-button primary-button" onclick="refreshDashboard()">
-                    ♻️ Refresh Dashboard
+                <button class="tool-button success-button" onclick="deploySSHKeys()">
+                    🔑 Deploy SSH Keys to All
                 </button>
             </div>
         </div>
         
         <div class="ssh-management">
             <h3>🔐 SSH Key Management</h3>
+            <div id="ssh-status"></div>
             <div class="ssh-form">
-                <input type="email" class="email-input" id="admin-email" placeholder="Enter admin email address" />
-                <div class="ssh-status not-ready" id="ssh-status">
-                    🔑 SSH Key Not Generated
-                </div>
-                <button class="tool-button success-button" onclick="generateSSHKey()">
+                <input type="email" 
+                       id="admin-email" 
+                       class="email-input" 
+                       placeholder="Enter your email address"
+                       required>
+                <button class="tool-button primary-button" onclick="generateSSHKey()">
                     🔑 Generate SSH Key
                 </button>
-                <button class="tool-button warning-button" onclick="deploySSHKeys()" id="deploy-button" disabled>
-                    🚀 Deploy to All Servers
-                </button>
-            </div>
-            <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                💡 Generate SSH keys for passwordless access to iDRAC servers. Keys stored in container.
             </div>
         </div>
         
-        <div id="servers-container">
-            <div class="loading">
-                <h3>🔄 Loading servers...</h3>
-                <p>Scanning network for iDRAC servers...</p>
+        <div class="status-panel">
+            <h2>🖥️ Discovered Servers</h2>
+            <div class="server-type-tabs" id="server-tabs">
+                <button class="tab-button active" onclick="filterServers('all')">All Servers</button>
+                <button class="tab-button" onclick="filterServers('idrac')">iDRAC</button>
+                <button class="tab-button" onclick="filterServers('proxmox')">Proxmox</button>
+                <button class="tab-button" onclick="filterServers('linux')">Linux/SSH</button>
+                <button class="tab-button" onclick="filterServers('windows')">Windows</button>
+                <button class="tab-button" onclick="filterServers('vnc')">VNC</button>
             </div>
-            <div class="servers-grid" id="servers-grid" style="display: none;">
-                <!-- Servers will be populated by JavaScript -->
+            <div id="servers-container">
+                <div class="server-grid" id="server-list">
+                    <p class="info-message">Loading servers...</p>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="notification" id="notification"></div>
+    <div class="footer">
+        <p>Homelab Server Management Dashboard - Container Edition</p>
+        <p>Auto-discovery enabled for iDRAC, Proxmox, Linux, Windows, and VNC servers</p>
+    </div>
     
     <script>
-        // Global state
-        let serverData = { servers: [], last_scan: '', scan_count: 0 };
-        let adminConfig = { admin_email: '', ssh_key_generated: false, ssh_key_path: '', last_updated: '' };
-        let apiOnline = false;
+        let allServers = [];
+        let currentFilter = 'all';
         
-        // Utility functions
-        function showNotification(message, type = 'info') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
-        }
-        
-        function formatDate(dateString) {
-            if (!dateString) return 'Never';
-            const date = new Date(dateString);
-            return date.toLocaleString();
-        }
-        
-        function timeSince(dateString) {
-            if (!dateString) return 'Unknown';
-            const now = new Date();
-            const date = new Date(dateString);
-            const seconds = Math.floor((now - date) / 1000);
-            
-            if (seconds < 60) return 'Just now';
-            if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
-            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
-            return Math.floor(seconds / 86400) + ' days ago';
-        }
-        
-        // API communication
-        async function callAPI(command, params = {}) {
+        // Load server data
+        async function loadServers() {
             try {
-                const response = await fetch('/api/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command, params })
-                });
-                
+                // Try new multi-server file first
+                let response = await fetch('/data/discovered_servers.json');
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    // Fallback to legacy file
+                    response = await fetch('/data/discovered_idracs.json');
                 }
                 
-                return await response.json();
-            } catch (error) {
-                console.error('API call failed:', error);
-                throw error;
-            }
-        }
-        
-        // Status checking
-        async function checkAPIStatus() {
-            try {
-                const response = await fetch('/api/status');
                 const data = await response.json();
+                allServers = data.servers || [];
                 
-                if (data.status === 'running') {
-                    apiOnline = true;
-                    document.getElementById('api-status').textContent = '✅ Online';
-                    document.getElementById('api-status').className = 'api-status online';
-                } else {
-                    throw new Error('API not running');
-                }
-            } catch (error) {
-                apiOnline = false;
-                document.getElementById('api-status').textContent = '❌ Offline';
-                document.getElementById('api-status').className = 'api-status offline';
-            }
-        }
-        
-        // Data loading
-        async function loadServerData() {
-            try {
-                const response = await fetch('/data/discovered_idracs.json');
-                serverData = await response.json();
-                
-                document.getElementById('last-scan').textContent = formatDate(serverData.last_scan);
+                updateStatusPanel(data);
                 renderServers();
-            } catch (error) {
-                console.error('Failed to load server data:', error);
-                showNotification('Failed to load server data', 'error');
-            }
-        }
-        
-        async function loadAdminConfig() {
-            try {
-                const response = await fetch('/data/admin_config.json');
-                adminConfig = await response.json();
                 
-                document.getElementById('admin-email').value = adminConfig.admin_email || '';
-                updateSSHStatus();
+                // Update tabs based on available server types
+                updateServerTabs();
             } catch (error) {
-                console.log('Admin config not found, using defaults');
-                updateSSHStatus();
+                console.error('Failed to load servers:', error);
+                document.getElementById('server-list').innerHTML = 
+                    '<p class="error-message">Failed to load server data. Please check the network scanner.</p>';
             }
         }
         
-        // Server management
-        function renderServers() {
-            const container = document.getElementById('servers-grid');
-            const loadingDiv = document.querySelector('.loading');
+        // Update server type tabs
+        function updateServerTabs() {
+            const serverTypes = new Set(allServers.map(s => s.type || 'unknown'));
+            // Tabs are already in HTML, just show/hide based on available types
+        }
+        
+        // Filter servers by type
+        function filterServers(type) {
+            currentFilter = type;
             
-            if (serverData.servers.length === 0) {
-                loadingDiv.innerHTML = `
-                    <h3>No iDRAC servers found</h3>
-                    <p>Click "Rescan Network" to search for servers</p>
+            // Update tab styles
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderServers();
+        }
+        
+        // Get server type icon
+        function getServerIcon(type) {
+            const icons = {
+                'idrac': '🖥️',
+                'proxmox': '🗄️',
+                'linux': '🐧',
+                'windows': '🪟',
+                'vnc': '🖼️',
+                'unknown': '❓'
+            };
+            return icons[type] || icons['unknown'];
+        }
+        
+        // Update status panel
+        function updateStatusPanel(data) {
+            const statusInfo = document.getElementById('status-info');
+            const lastScan = data.last_scan ? new Date(data.last_scan).toLocaleString() : 'Never';
+            const scanCount = data.scan_count || 0;
+            const onlineCount = allServers.filter(s => s.status === 'online').length;
+            const totalCount = allServers.length;
+            
+            // Count by type
+            const typeCounts = {};
+            allServers.forEach(server => {
+                const type = server.type || 'unknown';
+                typeCounts[type] = (typeCounts[type] || 0) + 1;
+            });
+            
+            let typeBreakdown = Object.entries(typeCounts)
+                .map(([type, count]) => `${getServerIcon(type)} ${type}: ${count}`)
+                .join(' | ');
+            
+            statusInfo.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Last Scan:</span>
+                    <span class="detail-value">${lastScan}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total Scans:</span>
+                    <span class="detail-value">${scanCount}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Servers Online:</span>
+                    <span class="detail-value">${onlineCount} / ${totalCount}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Server Types:</span>
+                    <span class="detail-value">${typeBreakdown || 'None'}</span>
+                </div>
+            `;
+        }
+        
+        // Render server cards
+        function renderServers() {
+            const serverList = document.getElementById('server-list');
+            
+            // Filter servers based on current filter
+            const filteredServers = currentFilter === 'all' 
+                ? allServers 
+                : allServers.filter(s => (s.type || 'unknown') === currentFilter);
+            
+            if (filteredServers.length === 0) {
+                serverList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📡</div>
+                        <h3>No ${currentFilter === 'all' ? '' : currentFilter} servers found</h3>
+                        <p>The network scanner will automatically discover servers every 5 minutes.</p>
+                        <button class="tool-button primary-button" onclick="rescanNetwork()">
+                            🔄 Scan Network Now
+                        </button>
+                    </div>
                 `;
-                container.style.display = 'none';
                 return;
             }
             
-            loadingDiv.style.display = 'none';
-            container.style.display = 'grid';
-            
-            container.innerHTML = serverData.servers.map(server => {
-                const statusClass = `status-${server.status}`;
-                const cardClass = server.status;
-                const isOffline = server.status === 'offline';
+            serverList.innerHTML = filteredServers.map(server => {
+                const isOnline = server.status === 'online';
+                const statusClass = isOnline ? 'status-online' : 'status-offline';
+                const statusText = isOnline ? '🟢 Online' : '🔴 Offline';
+                const serverType = server.type || 'unknown';
+                const typeIcon = getServerIcon(serverType);
+                
+                // Extract IP from URL or use IP field
+                const ip = server.ip || server.url.replace(/^https?:\\/\\//, '').split(/[\\/\\:]/)[0];
                 
                 return `
-                    <div class="server-card ${cardClass}">
-                        <div class="server-status ${statusClass}">${server.status}</div>
-                        <div class="server-title">${server.title}</div>
-                        <div class="server-url">${server.url}</div>
-                        <div style="font-size: 0.8em; color: #95a5a6; margin-bottom: 15px;">
-                            <div>First seen: ${formatDate(server.first_discovered)}</div>
-                            <div>Last seen: ${timeSince(server.last_seen)}</div>
+                    <div class="server-card">
+                        <div class="server-type-icon type-${serverType}">
+                            ${typeIcon}
+                        </div>
+                        <div class="server-header">
+                            <div>
+                                <div class="server-title">${server.title || 'Unknown Server'}</div>
+                                <div class="server-url">${server.url}</div>
+                            </div>
+                            <div class="server-status ${statusClass}">
+                                ${statusText}
+                            </div>
+                        </div>
+                        <div class="server-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Type:</span>
+                                <span class="detail-value">${serverType.toUpperCase()}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">IP Address:</span>
+                                <span class="detail-value">${ip}</span>
+                            </div>
+                            ${server.protocol ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Protocol:</span>
+                                <span class="detail-value">${server.protocol}</span>
+                            </div>
+                            ` : ''}
+                            ${server.services && server.services.length > 0 ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Services:</span>
+                                <span class="detail-value">${server.services.map(s => s.type).join(', ')}</span>
+                            </div>
+                            ` : ''}
                         </div>
                         <div class="server-actions">
-                            <button class="access-button ${isOffline ? 'disabled' : ''}" 
-                               onclick="${isOffline ? 'return false;' : `openIDRAC('${server.url}')`}" 
-                               ${isOffline ? 'disabled' : ''}>
-                               ${isOffline ? '⚠️ Offline' : '🔗 Access iDRAC'}
-                            </button>
-                            <button class="access-button console-button ${isOffline ? 'disabled' : ''}" 
-                               onclick="${isOffline ? 'return false;' : `launchVirtualConsole('${server.url}')`}" 
-                               ${isOffline ? 'disabled' : ''}>
-                               ${isOffline ? '⚠️ Offline' : '🖥️ Virtual Console'}
-                            </button>
-                            <button class="remove-button" onclick="removeServer('${server.url}')" title="Remove from dashboard">
-                                ❌
+                            ${isOnline ? `
+                                <button class="action-button connect-button" 
+                                        onclick="connectToServer('${ip}')">
+                                    🚀 Connect
+                                </button>
+                            ` : ''}
+                            <button class="action-button remove-button" 
+                                    onclick="removeServer('${server.url}')">
+                                🗑️ Remove
                             </button>
                         </div>
                     </div>
@@ -583,202 +704,297 @@ def generate_dashboard():
             }).join('');
         }
         
-        // Server actions
-        function openIDRAC(url) {
-            window.open(url, '_blank');
-        }
-        
-        async function launchVirtualConsole(url) {
-            if (!apiOnline) {
-                showNotification('API server offline. Opening iDRAC console manually.', 'warning');
-                window.open(url + '/console', '_blank');
-                return;
-            }
-            
+        // Connect to server
+        async function connectToServer(ip) {
             try {
-                const ip = url.replace(/https?:\\/\\//, '').split('/')[0];
-                const result = await callAPI('launch_virtual_console', { ip });
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        command: 'launch_virtual_console',
+                        params: { ip }
+                    })
+                });
+                
+                const result = await response.json();
                 
                 if (result.status === 'success') {
-                    showNotification(result.message, 'success');
-                    // Also open the console URL
-                    window.open(result.console_url, '_blank');
-                } else {
-                    throw new Error(result.error || 'Failed to launch console');
-                }
-            } catch (error) {
-                showNotification(`Console launch failed: ${error.message}`, 'error');
-                // Fallback to direct URL
-                window.open(url + '/console', '_blank');
-            }
-        }
-        
-        async function removeServer(url) {
-            if (!confirm('Remove this server from the dashboard?')) return;
-            
-            if (!apiOnline) {
-                showNotification('API server offline. Cannot remove server.', 'error');
-                return;
-            }
-            
-            try {
-                const result = await callAPI('remove_server', { url });
-                
-                if (result.status === 'success') {
-                    showNotification(result.message, 'success');
-                    await loadServerData();
-                } else {
-                    throw new Error(result.error || 'Failed to remove server');
-                }
-            } catch (error) {
-                showNotification(`Remove failed: ${error.message}`, 'error');
-            }
-        }
-        
-        async function rescanNetwork() {
-            if (!apiOnline) {
-                showNotification('API server offline. Cannot rescan network.', 'error');
-                return;
-            }
-            
-            try {
-                const result = await callAPI('rescan_network');
-                
-                if (result.status === 'success') {
-                    showNotification('Network rescan started. Refreshing in 30 seconds...', 'info');
+                    // Download the connection script
+                    const link = document.createElement('a');
+                    link.href = `/downloads/${result.download_script}`;
+                    link.download = result.download_script;
+                    link.click();
                     
-                    setTimeout(async () => {
-                        await loadServerData();
-                        showNotification('Dashboard refreshed with latest scan results', 'success');
+                    showMessage('success', `Connection prepared for ${result.server_type} server at ${ip}. Check your downloads.`);
+                } else {
+                    showMessage('error', result.error || 'Failed to prepare connection');
+                }
+            } catch (error) {
+                showMessage('error', 'Failed to connect: ' + error.message);
+            }
+        }
+        
+        // Remove server
+        async function removeServer(url) {
+            if (!confirm('Are you sure you want to remove this server?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        command: 'remove_server',
+                        params: { url }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showMessage('success', 'Server removed successfully');
+                    loadServers(); // Reload the list
+                } else {
+                    showMessage('error', result.error || 'Failed to remove server');
+                }
+            } catch (error) {
+                showMessage('error', 'Failed to remove server: ' + error.message);
+            }
+        }
+        
+        // Rescan network
+        async function rescanNetwork() {
+            const scanStatus = document.getElementById('scan-status');
+            scanStatus.innerHTML = '<p class="info-message">Scanning network... <span class="loading"></span></p>';
+            
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: 'rescan_network' })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    scanStatus.innerHTML = '<p class="success-message">Network scan started. Results will appear in 30-60 seconds.</p>';
+                    
+                    // Reload after delay
+                    setTimeout(() => {
+                        loadServers();
+                        scanStatus.innerHTML = '';
                     }, 30000);
                 } else {
-                    throw new Error(result.error || 'Failed to start rescan');
+                    scanStatus.innerHTML = `<p class="error-message">Scan failed: ${result.error}</p>`;
                 }
             } catch (error) {
-                showNotification(`Rescan failed: ${error.message}`, 'error');
+                scanStatus.innerHTML = `<p class="error-message">Failed to start scan: ${error.message}</p>`;
             }
         }
         
-        async function cleanupOfflineServers() {
-            const offlineCount = serverData.servers.filter(s => s.status === 'offline').length;
-            
-            if (offlineCount === 0) {
-                showNotification('No offline servers to remove.', 'info');
+        // Scan custom ranges
+        async function scanCustomRanges() {
+            const rangesInput = document.getElementById('custom-ranges').value.trim();
+            if (!rangesInput) {
+                showMessage('error', 'Please enter network ranges to scan');
                 return;
             }
             
-            if (!confirm(`Remove ${offlineCount} offline server(s) from the dashboard?`)) return;
+            const ranges = rangesInput.split(',').map(r => r.trim()).filter(r => r);
+            const scanStatus = document.getElementById('scan-status');
+            scanStatus.innerHTML = `<p class="info-message">Scanning ${ranges.length} custom ranges... <span class="loading"></span></p>`;
             
-            // Remove offline servers locally (since this is a simple operation)
-            serverData.servers = serverData.servers.filter(s => s.status !== 'offline');
-            renderServers();
-            showNotification(`Removed ${offlineCount} offline servers`, 'success');
+            try {
+                const response = await fetch('/api/scan/custom', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ranges })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    scanStatus.innerHTML = '<p class="success-message">Custom scan started. Results will appear in 30-60 seconds.</p>';
+                    
+                    // Reload after delay
+                    setTimeout(() => {
+                        loadServers();
+                        scanStatus.innerHTML = '';
+                    }, 30000);
+                } else {
+                    scanStatus.innerHTML = `<p class="error-message">Scan failed: ${result.error}</p>`;
+                }
+            } catch (error) {
+                scanStatus.innerHTML = `<p class="error-message">Failed to start scan: ${error.message}</p>`;
+            }
         }
         
-        function refreshDashboard() {
-            location.reload();
+        // Export to RDM
+        async function exportToRDM(format) {
+            try {
+                window.location.href = `/api/export/rdm/${format}`;
+                showMessage('success', `Exporting servers to RDM ${format.toUpperCase()} format...`);
+            } catch (error) {
+                showMessage('error', 'Failed to export: ' + error.message);
+            }
         }
         
         // SSH Key Management
-        function updateSSHStatus() {
-            const statusElement = document.getElementById('ssh-status');
-            const deployButton = document.getElementById('deploy-button');
-            
-            if (adminConfig.ssh_key_generated) {
-                statusElement.textContent = '✅ SSH Key Ready';
-                statusElement.className = 'ssh-status ready';
-                deployButton.disabled = false;
-            } else {
-                statusElement.textContent = '🔑 SSH Key Not Generated';
-                statusElement.className = 'ssh-status not-ready';
-                deployButton.disabled = true;
-            }
-        }
-        
-        async function generateSSHKey() {
-            const email = document.getElementById('admin-email').value;
-            
-            if (!email || !email.includes('@')) {
-                showNotification('Please enter a valid email address first.', 'error');
-                return;
-            }
-            
-            if (!apiOnline) {
-                showNotification('API server offline. Cannot generate SSH key.', 'error');
-                return;
-            }
-            
+        async function checkSSHStatus() {
             try {
-                const result = await callAPI('generate_ssh_key', { email });
-                
-                if (result.status === 'success') {
-                    adminConfig.admin_email = email;
-                    adminConfig.ssh_key_generated = true;
-                    adminConfig.ssh_key_path = result.key_path;
-                    adminConfig.last_updated = new Date().toISOString();
+                const response = await fetch('/data/admin_config.json');
+                if (response.ok) {
+                    const config = await response.json();
+                    const sshStatus = document.getElementById('ssh-status');
                     
-                    updateSSHStatus();
-                    showNotification(result.message, 'success');
-                } else {
-                    throw new Error(result.error || 'SSH key generation failed');
+                    if (config.ssh_key_generated) {
+                        sshStatus.innerHTML = `
+                            <div class="success-message">
+                                ✅ SSH key generated for: ${config.admin_email}
+                                <br>
+                                <small>Last updated: ${new Date(config.last_updated).toLocaleString()}</small>
+                            </div>
+                        `;
+                        document.getElementById('admin-email').value = config.admin_email;
+                    }
                 }
             } catch (error) {
-                showNotification(`SSH key generation failed: ${error.message}`, 'error');
+                console.log('No SSH configuration found');
             }
         }
         
-        async function deploySSHKeys() {
-            if (!apiOnline) {
-                showNotification('API server offline. Cannot deploy SSH keys.', 'error');
+        // Generate SSH key
+        async function generateSSHKey() {
+            const email = document.getElementById('admin-email').value.trim();
+            if (!email) {
+                showMessage('error', 'Please enter your email address');
                 return;
             }
             
-            const onlineServers = serverData.servers.filter(s => s.status === 'online');
-            
-            if (onlineServers.length === 0) {
-                showNotification('No online servers found to deploy SSH keys to.', 'warning');
-                return;
-            }
+            const sshStatus = document.getElementById('ssh-status');
+            sshStatus.innerHTML = '<p class="info-message">Generating SSH key... <span class="loading"></span></p>';
             
             try {
-                const result = await callAPI('deploy_ssh_keys');
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        command: 'generate_ssh_key',
+                        params: { email }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    sshStatus.innerHTML = `
+                        <div class="success-message">
+                            ✅ SSH key generated successfully!
+                            <br>
+                            <small>You can now deploy keys to servers.</small>
+                        </div>
+                    `;
+                } else {
+                    sshStatus.innerHTML = `<p class="error-message">Failed: ${result.error}</p>`;
+                }
+            } catch (error) {
+                sshStatus.innerHTML = `<p class="error-message">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Deploy SSH keys
+        async function deploySSHKeys() {
+            if (!confirm('Deploy SSH keys to all online servers with SSH support?')) {
+                return;
+            }
+            
+            const sshStatus = document.getElementById('ssh-status');
+            sshStatus.innerHTML = '<p class="info-message">Deploying SSH keys... <span class="loading"></span></p>';
+            
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: 'deploy_ssh_keys' })
+                });
+                
+                const result = await response.json();
                 
                 if (result.status === 'success') {
                     const successCount = result.results.filter(r => r.success).length;
-                    showNotification(`SSH deployment complete: ${successCount}/${result.results.length} servers`, 'success');
+                    const totalCount = result.results.length;
+                    
+                    let details = result.results.map(r => 
+                        `${r.ip} (${r.type}): ${r.success ? '✅ Success' : '❌ ' + r.message}`
+                    ).join('<br>');
+                    
+                    sshStatus.innerHTML = `
+                        <div class="${successCount > 0 ? 'success' : 'error'}-message">
+                            SSH deployment complete: ${successCount}/${totalCount} successful
+                            <br><br>
+                            <details>
+                                <summary>View Details</summary>
+                                <div style="margin-top: 10px; font-size: 12px;">
+                                    ${details}
+                                </div>
+                            </details>
+                        </div>
+                    `;
                 } else {
-                    throw new Error(result.error || 'SSH deployment failed');
+                    sshStatus.innerHTML = `<p class="error-message">Failed: ${result.error}</p>`;
                 }
             } catch (error) {
-                showNotification(`SSH deployment failed: ${error.message}`, 'error');
+                sshStatus.innerHTML = `<p class="error-message">Error: ${error.message}</p>`;
             }
         }
         
-        // Initialize dashboard
-        async function initializeDashboard() {
-            await checkAPIStatus();
-            await loadServerData();
-            await loadAdminConfig();
+        // Show message
+        function showMessage(type, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `${type}-message`;
+            messageDiv.textContent = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '1000';
+            messageDiv.style.maxWidth = '400px';
             
-            // Set up periodic status checks
-            setInterval(checkAPIStatus, 30000);
-            setInterval(loadServerData, 60000);
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
         }
         
-        // Start the dashboard when page loads
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadServers();
+            checkSSHStatus();
+            
+            // Auto-refresh every 60 seconds
+            setInterval(loadServers, 60000);
+        });
     </script>
 </body>
 </html>'''
     
-    # Ensure directory exists
-    os.makedirs(WWW_DIR, exist_ok=True)
-    
-    # Write dashboard file
+    # Write the dashboard file
     with open(TEMPLATE_FILE, 'w') as f:
         f.write(dashboard_html)
     
-    print(f"Dashboard generated: {TEMPLATE_FILE}")
+    print(f"Dashboard generated at {TEMPLATE_FILE}")
+
+def main():
+    """Main entry point"""
+    # Ensure directories exist
+    os.makedirs(WWW_DIR, exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    
+    # Generate dashboard
+    generate_dashboard()
+    
+    return 0
 
 if __name__ == '__main__':
-    generate_dashboard()
+    exit(main())

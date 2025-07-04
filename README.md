@@ -1,18 +1,20 @@
-# iDRAC Management Container
+# Homelab Server Management Container
 
-A containerized solution for managing Dell iDRAC servers through a professional web dashboard deployed on Proxmox.
+A containerized solution for managing multiple server types (iDRAC, Proxmox, Linux, Windows, VNC) through a professional web dashboard deployed on Proxmox.
 
 ## Overview
 
-This solution provides centralized iDRAC management through a Docker container that runs on your Proxmox host. It eliminates macOS quarantine issues, provides network-wide access, and offers a professional web-based management interface.
+This solution provides centralized server management through a Docker container that runs on your Proxmox host. It automatically discovers and manages various server types in your homelab, eliminates access issues, and offers a professional web-based management interface with Remote Desktop Manager integration.
 
 **Key Benefits:**
 
 - 🌐 **Access from any device** - Web dashboard works on phones, tablets, laptops
 - 🚫 **No macOS quarantine issues** - Everything is browser-based
-- 🔍 **Auto-discovery** - Finds all iDRAC servers automatically
+- 🔍 **Multi-server auto-discovery** - Finds iDRAC, Proxmox, Linux, Windows, and VNC servers
 - 🔑 **SSH key management** - Generate and deploy keys with one click
-- 🖥️ **One-click console access** - Direct Virtual Console launching
+- 🖥️ **One-click connections** - Launch appropriate client for each server type
+- 📤 **RDM Export** - Export to Remote Desktop Manager (JSON/XML formats)
+- 🎯 **Custom network scanning** - Scan specific network ranges on demand
 - 🐳 **Enterprise-ready** - Container-based deployment
 
 ## 🚀 Quick Deployment
@@ -56,26 +58,29 @@ The deployment script will automatically detect your Proxmox host IP and provide
 That's it! The container will automatically:
 
 - ✅ Install Docker if needed
-- ✅ Build the iDRAC management container
+- ✅ Build the multi-server management container
 - ✅ Start all services (web server, API, network scanner)
-- ✅ Begin discovering iDRAC servers on your network
-- ✅ Provide a web dashboard for management
+- ✅ Begin discovering all server types on your network
+- ✅ Provide a web dashboard for unified management
 
 ## Dashboard Features
 
-### 📊 Server Management
+### 📊 Multi-Server Management
 
-- **Auto-discovery**: Scans network every 5 minutes for iDRAC servers
-- **Status monitoring**: Real-time online/offline status
-- **One-click access**: Direct links to iDRAC web interfaces
-- **Virtual Console**: Instant console access without downloads
+- **Auto-discovery**: Scans network every 5 minutes for all server types
+- **Server types**: iDRAC, Proxmox, Linux/SSH, Windows RDP, VNC
+- **Status monitoring**: Real-time online/offline status for all servers
+- **One-click access**: Appropriate connection method for each server type
+- **Custom scanning**: Add specific network ranges to discover
+- **Remote Desktop Manager export**: Export all servers to RDM (JSON/XML)
 
 ### 🔐 SSH Key Management
 
 - **Generate SSH keys**: RSA 4096-bit with email identification
-- **Deploy to servers**: One-click deployment to all online iDRACs
+- **Deploy to servers**: One-click deployment to all SSH-capable servers
 - **Passwordless access**: SSH directly using auto-configured aliases
 - **Secure storage**: Keys stored safely within container
+- **Multi-server support**: Works with iDRAC, Linux, and any SSH server
 
 ### 🌐 Network-Wide Access
 
@@ -83,6 +88,14 @@ That's it! The container will automatically:
 - **Professional UI**: Clean, responsive web interface
 - **Real-time updates**: Dashboard refreshes automatically
 - **Multi-user ready**: Multiple people can access simultaneously
+
+### 📤 Remote Desktop Manager Integration
+
+- **Export formats**: JSON and XML (.rdm) supported
+- **Auto-configured connections**: Each server type properly configured
+- **Credential templates**: Default usernames included
+- **Group organization**: All servers grouped under "Homelab Servers"
+- **One-click import**: Import directly into RDM
 
 ## Default Credentials
 

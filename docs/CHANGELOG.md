@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2025-07-04
+
+### Major Features
+
+- Multi-server type discovery support (iDRAC, Proxmox, Linux/SSH, Windows RDP, VNC)
+- Remote Desktop Manager (RDM) export functionality in JSON and XML formats
+- Custom network range scanning capability
+- Enhanced dashboard with server type filtering
+- Automatic server type detection and categorization
+
+### Added
+
+- `network-scanner.py`: Complete rewrite to support multiple server types
+- `idrac-container-api.py`: New endpoints for RDM export and custom scanning
+- `dashboard-generator.py`: Enhanced UI with tabs, export buttons, and custom scan input
+- Server type icons and color coding in dashboard
+- Support for Windows RDP (port 3389) and WinRM (port 5985)
+- Support for VNC servers (ports 5900, 5901)
+- Support for Proxmox VE servers (port 8006)
+- Automatic SSH support detection for Linux servers
+- RDM export with pre-configured connection settings per server type
+
+### Changed
+
+- Renamed from "iDRAC Management Container" to "Homelab Server Management Container"
+- Updated all documentation to reflect multi-server capabilities
+- Enhanced API to support new server types and export formats
+- Improved network scanning with concurrent range support
+- Updated SSH key deployment to work with all SSH-capable servers
+
+### Technical
+
+- Added `ipaddress` module for proper CIDR network handling
+- Implemented server type detection logic based on port and service fingerprinting
+- Added XML generation for RDM export format
+- Backward compatibility maintained with legacy `discovered_idracs.json`
+
 ## [2.6.2] - 2025-07-02
 
 ### Fixed in v2.6.2 at 2025-07-02 15:23:48 EDT
