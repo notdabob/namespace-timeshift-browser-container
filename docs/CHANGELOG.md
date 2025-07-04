@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - 2025-07-04
+
+### Fixed in v3.1.0 at 2025-07-04 00:58:37 EDT
+
+- Network scanner continuous operation - scanner now runs indefinitely with 5-minute intervals
+- Missing data file initialization - added init-data.py to create required JSON files on startup
+- JavaScript error handling for API responses - better handling of non-JSON responses
+- Dashboard loading when no servers discovered - graceful handling of missing data files
+- Supervisor configuration for scanner restart policies and log rotation
+
+### Added in v3.1.0 at 2025-07-04 00:58:37 EDT
+
+- `init-data.py` - Initializes required data files on container startup
+- `debug-scanner.sh` - Diagnostic script for troubleshooting scanner issues
+- `SCANNER-FIX.md` - Documentation of scanner fixes and debugging steps
+- Better error logging throughout the scanner module
+- Automatic data directory creation in scanner
+
+### Enhanced in v3.1.0 at 2025-07-04 00:58:37 EDT
+
+- Error handling in dashboard JavaScript for API calls
+- Network scanner with continuous operation mode
+- Supervisor configuration with retry settings and log limits
+- Container startup script to initialize data files properly
+
 ## [3.0.0] - 2025-07-04
 
 ### Major Features

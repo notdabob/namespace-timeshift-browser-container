@@ -27,6 +27,9 @@ CUSTOM_RANGES_FILE = os.path.join(DATA_DIR, 'custom_ranges.json')
 SCAN_TIMEOUT = 3
 MAX_WORKERS = 50
 
+# Ensure data directory exists
+os.makedirs(DATA_DIR, exist_ok=True)
+
 # Server type definitions with ports and identifiers
 SERVER_TYPES = {
     'idrac': {
@@ -292,9 +295,10 @@ def load_existing_servers():
         try:
             with open(SERVERS_FILE, 'r') as f:
                 return json.load(f)
-        except:
-            pass
+        except Exception as e:
+            log_message(f"Error loading servers file: {e}")
     
+    # Return default structure
     return {
         'servers': [],
         'last_scan': '',
@@ -305,17 +309,21 @@ def load_existing_servers():
 def save_servers(data):
     """Save server list to file"""
     os.makedirs(DATA_DIR, exist_ok=True)
-    with open(SERVERS_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
-    
-    # Also maintain backward compatibility with old file
-    idrac_only = {
-        'servers': [s for s in data['servers'] if s['type'] == 'idrac'],
-        'last_scan': data['last_scan'],
-        'scan_count': data['scan_count']
-    }
-    with open(os.path.join(DATA_DIR, 'discovered_idracs.json'), 'w') as f:
-        json.dump(idrac_only, f, indent=2)
+    try:
+        with open(SERVERS_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+        log_message(f"Saved {len(data.get('servers', []))} servers to {SERVERS_FILE}")
+        
+        # Also maintain backward compatibility with old file
+        idrac_only = {
+            'servers': [s for s in data['servers'] if s.get('type') == 'idrac'],
+            'last_scan': data['last_scan'],
+            'scan_count': data['scan_count']
+        }
+        with open(os.path.join(DATA_DIR, 'discovered_idracs.json'), 'w') as f:
+            json.dump(idrac_only, f, indent=2)
+    except Exception as e:
+        log_message(f"Error saving servers: {e}")
 
 def update_server_status(servers_data, discovered_servers):
     """Update server status based on scan results"""
@@ -429,14 +437,25 @@ def main():
     # Ensure data directory exists
     os.makedirs(DATA_DIR, exist_ok=True)
     
-    # Perform scan
+    # Perform initial scan
     try:
         perform_scan()
     except Exception as e:
-        log_message(f"Scan failed: {e}")
+        log_message(f"Initial scan failed: {e}")
         import traceback
         traceback.print_exc()
-        return 1
+    
+    # Continue scanning every 5 minutes
+    log_message("Starting continuous scanning (every 5 minutes)...")
+    while True:
+        time.sleep(300)  # 5 minutes
+        try:
+            log_message("Starting scheduled network scan...")
+            perform_scan()
+        except Exception as e:
+            log_message(f"Scheduled scan failed: {e}")
+            import traceback
+            traceback.print_exc()
     
     return 0
 

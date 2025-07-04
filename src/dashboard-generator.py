@@ -530,6 +530,13 @@ def generate_dashboard():
                 if (!response.ok) {
                     // Fallback to legacy file
                     response = await fetch('/data/discovered_idracs.json');
+                    if (!response.ok) {
+                        // No data files exist yet
+                        allServers = [];
+                        updateStatusPanel({ servers: [], last_scan: '', scan_count: 0 });
+                        renderServers();
+                        return;
+                    }
                 }
                 
                 const data = await response.json();
@@ -775,6 +782,10 @@ def generate_dashboard():
                     body: JSON.stringify({ command: 'rescan_network' })
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
                 
                 if (result.status === 'success') {
@@ -811,6 +822,15 @@ def generate_dashboard():
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ranges })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Response is not JSON');
+                }
                 
                 const result = await response.json();
                 

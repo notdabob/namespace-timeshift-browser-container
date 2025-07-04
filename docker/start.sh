@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Container startup script for iDRAC Management
-echo "🚀 Starting iDRAC Management Container..."
+# Container startup script for Multi-Server Management
+echo "🚀 Starting Multi-Server Management Container..."
 
 # Create necessary directories
 mkdir -p /app/www/data /app/www/downloads /app/logs /root/.ssh
 
-# Initialize data files
-if [ ! -f /app/www/data/discovered_idracs.json ]; then
-    echo '{"servers": [], "last_scan": "", "scan_count": 0}' > /app/www/data/discovered_idracs.json
-fi
+# Initialize data files using Python script
+echo "📁 Initializing data files..."
+python3 /app/src/init-data.py
 
+# Legacy support
 if [ ! -f /app/www/data/admin_config.json ]; then
     echo '{"admin_email": "", "ssh_key_generated": false, "ssh_key_path": "", "last_updated": ""}' > /app/www/data/admin_config.json
 fi
@@ -23,8 +23,8 @@ python3 /app/src/dashboard-generator.py
 chown -R www-data:www-data /app/www
 chmod 755 /app/www/downloads
 
-# Add network scanning cron job
-echo "*/5 * * * * python3 /app/src/network-scanner.py" | crontab -
+# Remove old cron job (scanner now runs continuously)
+# echo "*/5 * * * * python3 /app/src/network-scanner.py" | crontab -
 
 echo "✅ Container initialization complete"
 echo "🌐 Dashboard will be available on port 80"
