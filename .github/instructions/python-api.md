@@ -1,7 +1,6 @@
 ---
 applyTo: 
   - "src/idrac-container-api.py"
-  - "src/idrac-api-server.py"
 ---
 
 # Python API Development Instructions

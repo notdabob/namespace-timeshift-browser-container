@@ -109,11 +109,11 @@ Each service should be self-contained with:
 ### Source Code Organization
 ```
 src/
-├── idrac-container-api.py    # Main API server (primary)
-├── idrac-api-server.py       # Alternative API implementation
+├── idrac-container-api.py    # Main API server
 ├── network-scanner.py        # Discovery service
 ├── dashboard-generator.py    # Web interface generator
-└── init-data.py             # Data initialization
+├── init-data.py             # Data initialization
+└── sync_shell_aliases.sh    # SSH alias management
 ```
 
 ## API Endpoints and Functionality

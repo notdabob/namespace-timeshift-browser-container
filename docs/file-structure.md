@@ -30,9 +30,9 @@ namespace-timeshift-browser-container/
 │
 ├── src/                          # Application source code
 │   ├── idrac-container-api.py   # REST API server for iDRAC operations
-│   ├── idrac-api-server.py      # Alternative API server implementation
 │   ├── network-scanner.py       # Network discovery service
 │   ├── dashboard-generator.py   # Web dashboard generator
+│   ├── init-data.py             # Data initialization on startup
 │   └── sync_shell_aliases.sh    # SSH alias management script
 │
 ├── deploy-proxmox.sh            # Main deployment script for Proxmox
@@ -74,7 +74,7 @@ namespace-timeshift-browser-container/
   - Generates responsive HTML
   - Creates download scripts
 
-- **idrac-api-server.py**: Alternative API implementation (development variant)
+- **init-data.py**: Initializes required data files on container startup
 - **sync_shell_aliases.sh**: Manages SSH config file with server aliases
 
 ### 📚 Documentation (`/docs`)
