@@ -8,6 +8,22 @@
 # macOS system files
 .DS_Store
 
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.tox/
+
+# Code quality tools
+.flake8-cache/
+.mypy_cache/
+
 # Temporary files
 *.tmp
 *.log
